@@ -1,30 +1,38 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from database import Base
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
 
 
-class Order(Base):
-    __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    total_price = Column(Float, nullable=False)
-    status = Column(String(50), nullable=False, default="pending")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    items = relationship("OrderItem", back_populates="order")
-    user = relationship("User")
+class OrderItemCreate(BaseModel):
+    menu_item_id: int
+    quantity: int
 
 
-class OrderItem(Base):
-    __tablename__ = "order_items"
+class OrderCreate(BaseModel):
+    items: List[OrderItemCreate]
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    menu_item_id = Column(Integer, ForeignKey("menu_items.id"), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    price = Column(Float, nullable=False)
 
-    order = relationship("Order", back_populates="items")
-    menu_item = relationship("MenuItem")
+class OrderItemOut(BaseModel):
+    id: int
+    menu_item_id: int
+    quantity: int
+    price: float
+
+    class Config:
+        from_attributes = True
+
+
+class OrderOut(BaseModel):
+    id: int
+    user_id: int
+    total_price: float
+    status: str
+    created_at: Optional[datetime]
+    items: List[OrderItemOut]
+
+    class Config:
+        from_attributes = True
+
+
+class OrderStatusUpdate(BaseModel):
+    status: str
