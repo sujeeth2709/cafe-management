@@ -7,8 +7,10 @@ def get_all_items(db: Session):
     return db.query(MenuItem).all()
 
 
+
 def get_item_by_id(db: Session, item_id: int):
     return db.query(MenuItem).filter(MenuItem.id == item_id).first()
+
 
 
 def create_item(db: Session, item: MenuItemCreate):

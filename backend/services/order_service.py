@@ -5,6 +5,8 @@ from schemas.order import OrderCreate
 from fastapi import HTTPException
 
 
+
+
 def create_order(db: Session, order: OrderCreate, user_id: int):
     total = 0
     order_items = []
