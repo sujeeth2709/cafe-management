@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base
 
-# Import all models so SQLAlchemy creates tables
-from models import user, menu, order, reservation
-
-# Import all routers
+# Import routers
 from routers import auth, menu as menu_router, orders, reservations, admin, cart
 
 app = FastAPI(title="Cafe Management API", version="1.0.0")
@@ -19,10 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create all tables on startup
-Base.metadata.create_all(bind=engine)
-
-# Register all routers
+# Register routers
 app.include_router(auth.router)
 app.include_router(menu_router.router)
 app.include_router(orders.router)

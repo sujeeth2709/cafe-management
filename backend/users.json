@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "name": "Nithish",
+    "email": "nithishkumarsaravanan33@gmail.com",
+    "hashed_password": "$2b$12$oSrLVSJhAHdRrCcut9chgeHztMlcz/jC3IqS8n/3N/Ir31jMv4jV6",
+    "role": "customer",
+    "created_at": "2026-05-05T14:49:50.679854"
+  }
+]

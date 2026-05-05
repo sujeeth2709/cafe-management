@@ -1,43 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
-from database import get_db
-from schemas.menu import MenuItemCreate, MenuItemUpdate, MenuItemOut
-from services import menu_service
-from dependencies import require_admin
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/api/menu", tags=["Menu"])
 
+MENU_ITEMS = [
+    {"id": 1, "name": "Espresso", "price": 3.5, "category": "drinks", "is_available": True},
+    {"id": 2, "name": "Cappuccino", "price": 4.5, "category": "drinks", "is_available": True},
+    {"id": 3, "name": "Croissant", "price": 2.5, "category": "food", "is_available": True},
+    {"id": 4, "name": "Club Sandwich", "price": 7.0, "category": "food", "is_available": True},
+]
 
-@router.get("/", response_model=List[MenuItemOut])
-def get_all(db: Session = Depends(get_db)):
-    return menu_service.get_all_items(db)
+@router.get("/")
+def get_all():
+    return MENU_ITEMS
 
-
-@router.get("/{item_id}", response_model=MenuItemOut)
-def get_one(item_id: int, db: Session = Depends(get_db)):
-    item = menu_service.get_item_by_id(db, item_id)
+@router.get("/{item_id}")
+def get_one(item_id: int):
+    item = next((i for i in MENU_ITEMS if i["id"] == item_id), None)
     if not item:
+        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Item not found")
     return item
-
-
-@router.post("/", response_model=MenuItemOut)
-def create(item: MenuItemCreate, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    return menu_service.create_item(db, item)
-
-
-@router.put("/{item_id}", response_model=MenuItemOut)
-def update(item_id: int, item: MenuItemUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    updated = menu_service.update_item(db, item_id, item)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return updated
-
-
-@router.delete("/{item_id}")
-def delete(item_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    deleted = menu_service.delete_item(db, item_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return {"message": "Item deleted successfully"}
