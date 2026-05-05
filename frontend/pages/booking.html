@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserve a Table — CaféMaven</title>
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/navbar.css" />
+  <link rel="stylesheet" href="../styles/booking.css" />
+</head>
+<body>
+  <div id="toast-container"></div>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">Café<span>Maven</span></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="menu.html" class="nav-link">Menu</a>
+        <a href="booking.html" class="nav-link active">Reserve</a>
+        <a href="orders.html" class="nav-link">My Orders</a>
+      </div>
+      <div class="navbar-right">
+        <button class="cart-btn" onclick="window.location.href='cart.html'">🛒 Cart <span id="cart-badge"></span></button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content container">
+    <h1 class="page-title">Reserve a Table</h1>
+    <p class="page-subtitle">Book your perfect dining experience</p>
+
+    <div class="booking-layout">
+      <div>
+        <div class="booking-info">
+          <h2>Join us for a meal</h2>
+          <p>We'd love to host you. Choose your preferred date, time, and party size below.</p>
+          <ul class="info-list">
+            <li>Tables available daily 8 AM – 10 PM</li>
+            <li>Reservations confirmed within 2 hours</li>
+            <li>Group bookings welcome (up to 20 guests)</li>
+            <li>Special occasions? Add a note after booking</li>
+          </ul>
+        </div>
+
+        <div style="margin-top:36px">
+          <h3 style="margin-bottom:16px;font-size:1.1rem">My Reservations</h3>
+          <div id="my-reservations"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:20px">New Reservation</h3>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input id="res-date" type="date" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input id="res-time" type="time" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of Guests</label>
+          <input id="res-guests" type="number" class="form-input" min="1" max="20" placeholder="2" />
+        </div>
+        <button class="btn btn-primary btn-full" id="book-btn" onclick="bookTable()">Book Table</button>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:12px;text-align:center">
+          You must be signed in to make a reservation
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/api.js"></script>
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/utils.js"></script>
+  <script>
+    initNavbar();
+
+    // Set min date to today
+    document.getElementById('res-date').min = new Date().toISOString().split('T')[0];
+
+    async function bookTable() {
+      if (!isLoggedIn()) {
+        showToast('Please sign in first', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1000);
+        return;
+      }
+      const date = document.getElementById('res-date').value;
+      const time = document.getElementById('res-time').value;
+      const guests = parseInt(document.getElementById('res-guests').value);
+      const btn = document.getElementById('book-btn');
+      if (!date || !time || !guests) return showToast('Please fill in all fields', 'error');
+      btn.disabled = true; btn.textContent = 'Booking…';
+      try {
+        await Reservations.create(date, time + ':00', guests);
+        showToast('Table reserved! ✅', 'success');
+        document.getElementById('res-date').value = '';
+        document.getElementById('res-time').value = '';
+        document.getElementById('res-guests').value = '';
+        loadMyReservations();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+      btn.disabled = false; btn.textContent = 'Book Table';
+    }
+
+    async function loadMyReservations() {
+      const el = document.getElementById('my-reservations');
+      if (!isLoggedIn()) { el.innerHTML = `<p style="color:var(--text-muted);font-size:13px">Sign in to see your reservations</p>`; return; }
+      try {
+        const reservations = await Reservations.myReservations();
+        if (!reservations.length) {
+          el.innerHTML = `<p style="color:var(--text-muted);font-size:13px">No reservations yet</p>`;
+          return;
+        }
+        el.innerHTML = reservations.reverse().map(r => `
+          <div class="reservation-card">
+            <div class="reservation-card-header">
+              <span class="reservation-date">${formatDate(r.date)} at ${r.time}</span>
+              ${statusBadge(r.status)}
+            </div>
+            <div class="reservation-details">👥 ${r.guests} guest${r.guests > 1 ? 's' : ''} · Reservation #${r.id}</div>
+          </div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<p style="color:var(--danger);font-size:13px">${e.message}</p>`;
+      }
+    }
+
+    function initNavbar() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const area = document.getElementById('nav-user-area');
+      if (user) {
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+      } else {
+        area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
+      }
+      updateCartBadge();
+    }
+
+    loadMyReservations();
+  </script>
+</body>
+</html>

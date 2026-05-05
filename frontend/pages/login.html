@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — CaféMaven</title>
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/auth.css" />
+</head>
+<body>
+  <div id="toast-container"></div>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>Café<span>Maven</span></h1>
+        <p>Your table awaits</p>
+      </div>
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to your account</p>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="email" type="email" class="form-input" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="password" type="password" class="form-input" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Sign In</button>
+
+      <div class="auth-switch">
+        Don't have an account? <a href="register.html">Create one</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/api.js"></script>
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/utils.js"></script>
+  <script>
+    redirectIfLoggedIn();
+
+    async function doLogin() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('login-btn');
+      if (!email || !password) return showToast('Please fill in all fields', 'error');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        const { access_token } = await Auth.login(email, password);
+        // Decode user id from token (JWT) or re-fetch — store token first then get profile
+        localStorage.setItem('token', access_token);
+        // Fetch user info via /api/auth/me if available, else use register approach
+        // For now decode payload from JWT
+        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        // We store minimal info; role will be fetched on admin page
+        localStorage.setItem('user', JSON.stringify({ id: payload.sub, name: email.split('@')[0], email, role: 'customer' }));
+        showToast('Welcome back!', 'success');
+        setTimeout(() => window.location.href = 'index.html', 800);
+      } catch (e) {
+        showToast(e.message, 'error');
+        btn.disabled = false; btn.textContent = 'Sign In';
+      }
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+</html>

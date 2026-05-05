@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — CaféMaven</title>
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/navbar.css" />
+</head>
+<body>
+  <div id="toast-container"></div>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">Café<span>Maven</span></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="menu.html" class="nav-link">Menu</a>
+        <a href="booking.html" class="nav-link">Reserve</a>
+        <a href="orders.html" class="nav-link active">My Orders</a>
+      </div>
+      <div class="navbar-right">
+        <button class="cart-btn" onclick="window.location.href='cart.html'">🛒 Cart <span id="cart-badge"></span></button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content container">
+    <h1 class="page-title">My Orders</h1>
+    <p class="page-subtitle">Track your current and past orders</p>
+    <div id="orders-list"><div class="spinner"></div></div>
+  </div>
+
+  <script src="../scripts/api.js"></script>
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/utils.js"></script>
+  <script>
+    requireAuth();
+    initNavbar();
+
+    async function loadOrders() {
+      try {
+        const orders = await Orders.myOrders();
+        const el = document.getElementById('orders-list');
+        if (!orders.length) {
+          el.innerHTML = `<div class="empty-state">
+            <div style="font-size:2.5rem;margin-bottom:12px">📋</div>
+            <h3>No orders yet</h3>
+            <p style="margin-top:6px;margin-bottom:20px">Your order history will appear here</p>
+            <a href="menu.html" class="btn btn-primary">Start Ordering</a>
+          </div>`;
+          return;
+        }
+        el.innerHTML = orders.reverse().map(order => `
+          <div class="card" style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div>
+                <div style="font-weight:600;margin-bottom:2px">Order #${order.id}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${order.created_at ? formatDateTime(order.created_at) : '—'}</div>
+              </div>
+              <div style="text-align:right">
+                ${statusBadge(order.status)}
+                <div style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-top:4px">${formatCurrency(order.total_price)}</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:12px">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Items</div>
+              ${order.items.map(i => `
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                  <span>Item #${i.menu_item_id} × ${i.quantity}</span>
+                  <span style="color:var(--text-muted)">${formatCurrency(i.price * i.quantity)}</span>
+                </div>`).join('')}
+            </div>
+          </div>`).join('');
+      } catch (e) {
+        document.getElementById('orders-list').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+      }
+    }
+
+    function initNavbar() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const area = document.getElementById('nav-user-area');
+      if (user) {
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+      } else {
+        area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
+      }
+      updateCartBadge();
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

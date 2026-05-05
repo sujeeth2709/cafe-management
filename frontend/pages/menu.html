@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu — CaféMaven</title>
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/navbar.css" />
+  <link rel="stylesheet" href="../styles/menu.css" />
+</head>
+<body>
+  <div id="toast-container"></div>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">Café<span>Maven</span></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="menu.html" class="nav-link active">Menu</a>
+        <a href="booking.html" class="nav-link">Reserve</a>
+        <a href="orders.html" class="nav-link">My Orders</a>
+      </div>
+      <div class="navbar-right">
+        <button class="cart-btn" onclick="window.location.href='cart.html'">🛒 Cart <span id="cart-badge"></span></button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content container">
+    <h1 class="page-title">Our Menu</h1>
+    <p class="page-subtitle">Fresh, seasonal, made with love</p>
+
+    <div class="menu-filters" id="filters">
+      <button class="filter-btn active" data-cat="all">All</button>
+    </div>
+
+    <div id="menu-grid" class="grid-3">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <script src="../scripts/api.js"></script>
+  <script src="../scripts/auth.js"></script>
+  <script src="../scripts/utils.js"></script>
+  <script>
+    initNavbar();
+    let allItems = [];
+
+    async function loadMenu() {
+      try {
+        allItems = await Menu.getAll();
+        buildFilters();
+        renderMenu(allItems);
+      } catch (e) {
+        document.getElementById('menu-grid').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+      }
+    }
+
+    function buildFilters() {
+      const cats = ['all', ...new Set(allItems.map(i => i.category))];
+      const filtersEl = document.getElementById('filters');
+      filtersEl.innerHTML = cats.map(c => `
+        <button class="filter-btn ${c === 'all' ? 'active' : ''}" data-cat="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</button>
+      `).join('');
+      filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const cat = btn.dataset.cat;
+          renderMenu(cat === 'all' ? allItems : allItems.filter(i => i.category === cat));
+        });
+      });
+    }
+
+    function renderMenu(items) {
+      const grid = document.getElementById('menu-grid');
+      if (!items.length) {
+        grid.innerHTML = `<div class="empty-state"><h3>No items found</h3></div>`;
+        return;
+      }
+      grid.innerHTML = items.map(item => `
+        <div class="menu-card">
+          <div class="menu-card-img">
+            ${item.image_url
+              ? `<img src="${item.image_url}" alt="${item.name}" loading="lazy" />`
+              : `<span class="no-img">🍽</span>`}
+          </div>
+          <div class="menu-card-body">
+            <div class="menu-card-category">${item.category}</div>
+            <div class="menu-card-name">${item.name}</div>
+            <div class="menu-card-desc">${item.description || 'A delightful choice.'}</div>
+            <div class="menu-card-footer">
+              <span class="menu-card-price">${formatCurrency(item.price)}</span>
+              ${item.is_available
+                ? `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">Add to Cart</button>`
+                : `<span class="unavailable-badge">Unavailable</span>`}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(item) {
+      CartStore.add(item);
+      showToast(`${item.name} added to cart`, 'success');
+    }
+
+    function initNavbar() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const area = document.getElementById('nav-user-area');
+      if (user) {
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
+          ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+      } else {
+        area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
+      }
+      updateCartBadge();
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>
