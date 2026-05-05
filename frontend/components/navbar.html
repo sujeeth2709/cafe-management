@@ -1,0 +1,49 @@
+<!-- Include in every page via: fetch('/frontend/components/navbar.html') or just copy the nav block -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/frontend/pages/index.html" class="navbar-brand">Café<span>Maven</span></a>
+    <div class="navbar-links" id="nav-links">
+      <a href="/frontend/pages/index.html" class="nav-link">Home</a>
+      <a href="/frontend/pages/menu.html" class="nav-link">Menu</a>
+      <a href="/frontend/pages/booking.html" class="nav-link">Reserve</a>
+      <a href="/frontend/pages/orders.html" class="nav-link">My Orders</a>
+    </div>
+    <div class="navbar-right">
+      <button class="cart-btn" onclick="window.location.href='/frontend/pages/cart.html'">
+        🛒 Cart <span id="cart-badge"></span>
+      </button>
+      <div id="nav-user-area"></div>
+    </div>
+  </div>
+</nav>
+
+<script>
+(function() {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const area = document.getElementById('nav-user-area');
+  const links = document.getElementById('nav-links');
+
+  if (user) {
+    area.innerHTML = `
+      <div class="user-pill">
+        <span>${user.name.split(' ')[0]}</span>
+        <span class="user-role">${user.role}</span>
+      </div>
+      ${user.role === 'admin' ? '<a href="/frontend/pages/admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}
+      <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>
+    `;
+  } else {
+    area.innerHTML = `<a href="/frontend/pages/login.html" class="btn btn-sm btn-primary">Sign In</a>`;
+  }
+
+  // Highlight active nav
+  const path = window.location.pathname;
+  document.querySelectorAll('.nav-link').forEach(l => {
+    if (l.getAttribute('href') && path.endsWith(l.getAttribute('href').split('/').pop())) {
+      l.classList.add('active');
+    }
+  });
+
+  updateCartBadge();
+})();
+</script>

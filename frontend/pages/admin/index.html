@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — CaféMaven</title>
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../styles/navbar.css" />
+  <link rel="stylesheet" href="../../styles/admin.css" />
+</head>
+<body>
+  <div id="toast-container"></div>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-brand">Café<span>Maven</span> <span style="font-size:11px;color:var(--accent);margin-left:6px;font-family:var(--font-body);text-transform:uppercase;letter-spacing:.08em">Admin</span></a>
+      <div class="navbar-right">
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div style="padding-top:var(--nav-h)">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="sidebar-label">Overview</div>
+        <div class="sidebar-link active" onclick="showSection('dashboard')">📊 Dashboard</div>
+        <div class="sidebar-label">Management</div>
+        <div class="sidebar-link" onclick="showSection('menu')">🍽 Menu Items</div>
+        <div class="sidebar-link" onclick="showSection('orders')">📦 Orders</div>
+        <div class="sidebar-link" onclick="showSection('reservations')">📅 Reservations</div>
+        <div class="sidebar-label">Account</div>
+        <div class="sidebar-link" onclick="logout()">🚪 Sign Out</div>
+      </aside>
+
+      <main class="admin-main">
+        <!-- Dashboard -->
+        <div class="admin-section active" id="section-dashboard">
+          <div class="section-header">
+            <h2 class="section-title">Dashboard</h2>
+            <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+          </div>
+          <div class="stat-cards" id="stat-cards"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Menu Management -->
+        <div class="admin-section" id="section-menu">
+          <div class="section-header">
+            <h2 class="section-title">Menu Items</h2>
+            <button class="btn btn-primary btn-sm" onclick="openMenuModal()">+ Add Item</button>
+          </div>
+          <div id="menu-table"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Orders -->
+        <div class="admin-section" id="section-orders">
+          <div class="section-header">
+            <h2 class="section-title">All Orders</h2>
+            <button class="btn btn-secondary btn-sm" onclick="loadOrders()">↻ Refresh</button>
+          </div>
+          <div id="orders-table"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Reservations -->
+        <div class="admin-section" id="section-reservations">
+          <div class="section-header">
+            <h2 class="section-title">Reservations</h2>
+            <button class="btn btn-secondary btn-sm" onclick="loadReservations()">↻ Refresh</button>
+          </div>
+          <div id="reservations-table"><div class="spinner"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Menu Item Modal -->
+  <div class="modal-overlay" id="menu-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add Menu Item</h3>
+        <button class="modal-close" onclick="closeMenuModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input id="m-name" class="form-input" placeholder="Espresso" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <input id="m-category" class="form-input" placeholder="Coffee" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Price (₹)</label>
+        <input id="m-price" type="number" class="form-input" placeholder="150" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="m-desc" class="form-textarea" placeholder="Short description…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Image URL (optional)</label>
+        <input id="m-img" class="form-input" placeholder="https://…" />
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px">
+        <input id="m-avail" type="checkbox" checked style="width:16px;height:16px" />
+        <label class="form-label" style="margin:0">Available</label>
+      </div>
+      <input type="hidden" id="m-id" value="" />
+      <button class="btn btn-primary btn-full" id="modal-save-btn" onclick="saveMenuItem()">Save Item</button>
+    </div>
+  </div>
+
+  <script src="../../scripts/api.js"></script>
+  <script src="../../scripts/auth.js"></script>
+  <script src="../../scripts/utils.js"></script>
+  <script>
+    requireAuth();
+    initNavbar();
+    loadDashboard();
+
+    function showSection(name) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      document.getElementById(`section-${name}`).classList.add('active');
+      event.target.classList.add('active');
+      if (name === 'dashboard') loadDashboard();
+      else if (name === 'menu') loadMenuAdmin();
+      else if (name === 'orders') loadOrders();
+      else if (name === 'reservations') loadReservations();
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await Admin.dashboard();
+        document.getElementById('stat-cards').innerHTML = `
+          <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">${formatCurrency(data.total_revenue)}</div><div class="stat-sub">From delivered orders</div></div>
+          <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${data.total_orders}</div><div class="stat-sub">${data.pending_orders} pending</div></div>
+          <div class="stat-card"><div class="stat-label">Reservations</div><div class="stat-value">${data.total_reservations}</div><div class="stat-sub">${data.pending_reservations} pending</div></div>
+          <div class="stat-card"><div class="stat-label">Customers</div><div class="stat-value">${data.total_customers}</div><div class="stat-sub">Registered users</div></div>
+        `;
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function loadMenuAdmin() {
+      try {
+        const items = await Menu.getAll();
+        const el = document.getElementById('menu-table');
+        if (!items.length) { el.innerHTML = `<p style="color:var(--text-muted)">No menu items yet</p>`; return; }
+        el.innerHTML = `<div class="table-wrap"><table>
+          <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Actions</th></tr>
+          ${items.map(i => `<tr>
+            <td style="color:var(--text-muted)">#${i.id}</td>
+            <td><strong>${i.name}</strong><br><small style="color:var(--text-muted)">${i.description || ''}</small></td>
+            <td>${i.category}</td>
+            <td>${formatCurrency(i.price)}</td>
+            <td>${i.is_available ? '✅' : '❌'}</td>
+            <td style="display:flex;gap:8px">
+              <button class="btn btn-secondary btn-sm" onclick='editMenuItem(${JSON.stringify(i)})'>Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteMenuItem(${i.id})">Delete</button>
+            </td>
+          </tr>`).join('')}
+        </table></div>`;
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function loadOrders() {
+      try {
+        const orders = await Orders.allOrders();
+        const el = document.getElementById('orders-table');
+        const statusOptions = ['pending','confirmed','preparing','delivered','cancelled'];
+        el.innerHTML = `<div class="table-wrap"><table>
+          <tr><th>ID</th><th>User</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr>
+          ${orders.reverse().map(o => `<tr>
+            <td>#${o.id}</td><td>User #${o.user_id}</td>
+            <td>${formatCurrency(o.total_price)}</td>
+            <td>${statusBadge(o.status)}</td>
+            <td style="font-size:12px;color:var(--text-muted)">${o.created_at ? formatDateTime(o.created_at) : '—'}</td>
+            <td><select class="form-select" style="width:130px;padding:5px 8px;font-size:12px" onchange="updateOrderStatus(${o.id}, this.value)">
+              ${statusOptions.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${s}</option>`).join('')}
+            </select></td>
+          </tr>`).join('')}
+        </table></div>`;
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function updateOrderStatus(id, status) {
+      try {
+        await Orders.updateStatus(id, status);
+        showToast('Status updated', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function loadReservations() {
+      try {
+        const rsvps = await Reservations.allReservations();
+        const el = document.getElementById('reservations-table');
+        const statusOptions = ['pending','confirmed','cancelled'];
+        el.innerHTML = `<div class="table-wrap"><table>
+          <tr><th>ID</th><th>User</th><th>Date</th><th>Time</th><th>Guests</th><th>Status</th><th>Update</th></tr>
+          ${rsvps.reverse().map(r => `<tr>
+            <td>#${r.id}</td><td>User #${r.user_id}</td>
+            <td>${formatDate(r.date)}</td><td>${r.time}</td>
+            <td>👥 ${r.guests}</td>
+            <td>${statusBadge(r.status)}</td>
+            <td><select class="form-select" style="width:120px;padding:5px 8px;font-size:12px" onchange="updateReservationStatus(${r.id}, this.value)">
+              ${statusOptions.map(s => `<option value="${s}" ${s===r.status?'selected':''}>${s}</option>`).join('')}
+            </select></td>
+          </tr>`).join('')}
+        </table></div>`;
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function updateReservationStatus(id, status) {
+      try {
+        await Reservations.updateStatus(id, status);
+        showToast('Status updated', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // Menu item CRUD modal
+    function openMenuModal(item = null) {
+      document.getElementById('m-id').value = item ? item.id : '';
+      document.getElementById('m-name').value = item ? item.name : '';
+      document.getElementById('m-category').value = item ? item.category : '';
+      document.getElementById('m-price').value = item ? item.price : '';
+      document.getElementById('m-desc').value = item ? (item.description || '') : '';
+      document.getElementById('m-img').value = item ? (item.image_url || '') : '';
+      document.getElementById('m-avail').checked = item ? item.is_available : true;
+      document.getElementById('modal-title').textContent = item ? 'Edit Menu Item' : 'Add Menu Item';
+      document.getElementById('menu-modal').classList.add('open');
+    }
+
+    function editMenuItem(item) { openMenuModal(item); }
+
+    function closeMenuModal() {
+      document.getElementById('menu-modal').classList.remove('open');
+    }
+
+    async function saveMenuItem() {
+      const id = document.getElementById('m-id').value;
+      const data = {
+        name: document.getElementById('m-name').value,
+        category: document.getElementById('m-category').value,
+        price: parseFloat(document.getElementById('m-price').value),
+        description: document.getElementById('m-desc').value,
+        image_url: document.getElementById('m-img').value || null,
+        is_available: document.getElementById('m-avail').checked,
+      };
+      const btn = document.getElementById('modal-save-btn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try {
+        if (id) await Menu.update(id, data);
+        else await Menu.create(data);
+        showToast(id ? 'Item updated' : 'Item created', 'success');
+        closeMenuModal();
+        loadMenuAdmin();
+      } catch (e) { showToast(e.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Save Item';
+    }
+
+    async function deleteMenuItem(id) {
+      if (!confirm('Delete this item?')) return;
+      try {
+        await Menu.delete(id);
+        showToast('Item deleted', 'success');
+        loadMenuAdmin();
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function initNavbar() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const area = document.getElementById('nav-user-area');
+      if (user) {
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+      } else {
+        area.innerHTML = `<a href="../login.html" class="btn btn-sm btn-primary">Sign In</a>`;
+      }
+    }
+  </script>
+</body>
+</html>
