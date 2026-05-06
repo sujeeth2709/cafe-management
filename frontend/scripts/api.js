@@ -42,8 +42,9 @@ const Cart = {
 
 // ── Orders ───────────────────────────────────────────
 const Orders = {
-  create: (items) =>
-    apiFetch('/api/orders/', { method: 'POST', body: JSON.stringify({ items }) }),
+  // items: array of {menu_item_id, name, quantity, price}, tableNumber: int
+  create: (items, tableNumber) =>
+    apiFetch('/api/orders/', { method: 'POST', body: JSON.stringify({ items, table_number: tableNumber }) }),
   myOrders: () => apiFetch('/api/orders/me'),
   allOrders: () => apiFetch('/api/orders/'),
   updateStatus: (id, status) =>
@@ -52,8 +53,9 @@ const Orders = {
 
 // ── Reservations ─────────────────────────────────────
 const Reservations = {
-  create: (date, time, guests) =>
-    apiFetch('/api/reservations/', { method: 'POST', body: JSON.stringify({ date, time, guests }) }),
+  // tableNumber: int (1-20)
+  create: (date, time, guests, tableNumber) =>
+    apiFetch('/api/reservations/', { method: 'POST', body: JSON.stringify({ date, time, guests, table_number: tableNumber }) }),
   myReservations: () => apiFetch('/api/reservations/me'),
   allReservations: () => apiFetch('/api/reservations/'),
   updateStatus: (id, status) =>
@@ -63,4 +65,5 @@ const Reservations = {
 // ── Admin ────────────────────────────────────────────
 const Admin = {
   dashboard: () => apiFetch('/api/admin/dashboard'),
+  cashflow: () => apiFetch('/api/admin/cashflow'),
 };

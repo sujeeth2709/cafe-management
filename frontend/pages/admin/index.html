@@ -6,6 +6,17 @@
   <link rel="stylesheet" href="../../styles/base.css" />
   <link rel="stylesheet" href="../../styles/navbar.css" />
   <link rel="stylesheet" href="../../styles/admin.css" />
+  <style>
+    .cashflow-table table { width:100%; border-collapse:collapse; }
+    .cashflow-table th, .cashflow-table td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); font-size:13px; }
+    .cashflow-table th { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+    .cashflow-today { background:var(--surface-alt, #1a1a2e); border-radius:8px; }
+    .revenue-positive { color:#4ade80; font-weight:700; }
+    .summary-bar { display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+    .summary-pill { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 18px; flex:1; min-width:140px; }
+    .summary-pill .label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:4px; }
+    .summary-pill .value { font-size:1.4rem; font-weight:700; }
+  </style>
 </head>
 <body>
   <div id="toast-container"></div>
@@ -22,16 +33,18 @@
     <div class="admin-layout">
       <aside class="admin-sidebar">
         <div class="sidebar-label">Overview</div>
-        <div class="sidebar-link active" onclick="showSection('dashboard')">📊 Dashboard</div>
+        <div class="sidebar-link active" onclick="showSection('dashboard', event)">📊 Dashboard</div>
+        <div class="sidebar-link" onclick="showSection('cashflow', event)">💰 Cash Flow</div>
         <div class="sidebar-label">Management</div>
-        <div class="sidebar-link" onclick="showSection('menu')">🍽 Menu Items</div>
-        <div class="sidebar-link" onclick="showSection('orders')">📦 Orders</div>
-        <div class="sidebar-link" onclick="showSection('reservations')">📅 Reservations</div>
+        <div class="sidebar-link" onclick="showSection('menu', event)">🍽 Menu Items</div>
+        <div class="sidebar-link" onclick="showSection('orders', event)">📦 Orders</div>
+        <div class="sidebar-link" onclick="showSection('reservations', event)">📅 Reservations</div>
         <div class="sidebar-label">Account</div>
         <div class="sidebar-link" onclick="logout()">🚪 Sign Out</div>
       </aside>
 
       <main class="admin-main">
+
         <!-- Dashboard -->
         <div class="admin-section active" id="section-dashboard">
           <div class="section-header">
@@ -39,6 +52,16 @@
             <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">↻ Refresh</button>
           </div>
           <div class="stat-cards" id="stat-cards"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Cash Flow -->
+        <div class="admin-section" id="section-cashflow">
+          <div class="section-header">
+            <h2 class="section-title">💰 Cash Flow Log</h2>
+            <button class="btn btn-secondary btn-sm" onclick="loadCashflow()">↻ Refresh</button>
+          </div>
+          <div id="cashflow-summary" class="summary-bar"></div>
+          <div id="cashflow-table" class="cashflow-table"><div class="spinner"></div></div>
         </div>
 
         <!-- Menu Management -->
@@ -54,7 +77,10 @@
         <div class="admin-section" id="section-orders">
           <div class="section-header">
             <h2 class="section-title">All Orders</h2>
-            <button class="btn btn-secondary btn-sm" onclick="loadOrders()">↻ Refresh</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="openNewOrderModal()">+ New Order</button>
+              <button class="btn btn-secondary btn-sm" onclick="loadOrders()">↻ Refresh</button>
+            </div>
           </div>
           <div id="orders-table"><div class="spinner"></div></div>
         </div>
@@ -63,10 +89,14 @@
         <div class="admin-section" id="section-reservations">
           <div class="section-header">
             <h2 class="section-title">Reservations</h2>
-            <button class="btn btn-secondary btn-sm" onclick="loadReservations()">↻ Refresh</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="openNewReservationModal()">+ New Reservation</button>
+              <button class="btn btn-secondary btn-sm" onclick="loadReservations()">↻ Refresh</button>
+            </div>
           </div>
           <div id="reservations-table"><div class="spinner"></div></div>
         </div>
+
       </main>
     </div>
   </div>
@@ -107,6 +137,58 @@
     </div>
   </div>
 
+  <!-- New Order Modal -->
+  <div class="modal-overlay" id="new-order-modal">
+    <div class="modal" style="max-width:520px;max-height:85vh;overflow-y:auto">
+      <div class="modal-header">
+        <h3 class="modal-title">New Order</h3>
+        <button class="modal-close" onclick="closeNewOrderModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🪑 Table Number (1–20)</label>
+        <input id="no-table" type="number" class="form-input" min="1" max="20" placeholder="e.g. 5" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Menu Items</label>
+        <div id="no-menu-list" style="display:flex;flex-direction:column;gap:8px;margin-top:6px"><div class="spinner"></div></div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-weight:600">
+          <span>Total</span><span id="no-total">₹0.00</span>
+        </div>
+        <div id="no-selected-items" style="margin-top:8px;font-size:12px;color:var(--text-muted)">No items selected</div>
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:16px" id="no-submit-btn" onclick="submitNewOrder()">Place Order</button>
+    </div>
+  </div>
+
+  <!-- New Reservation Modal -->
+  <div class="modal-overlay" id="new-res-modal">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <h3 class="modal-title">New Reservation</h3>
+        <button class="modal-close" onclick="closeNewReservationModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input id="nr-date" type="date" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <input id="nr-time" type="time" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Number of Guests</label>
+        <input id="nr-guests" type="number" class="form-input" min="1" max="20" placeholder="2" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">🪑 Table Number (1–20)</label>
+        <input id="nr-table" type="number" class="form-input" min="1" max="20" placeholder="e.g. 5" />
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:4px" id="nr-submit-btn" onclick="submitNewReservation()">Book Table</button>
+    </div>
+  </div>
+
   <script src="../../scripts/api.js"></script>
   <script src="../../scripts/auth.js"></script>
   <script src="../../scripts/utils.js"></script>
@@ -115,29 +197,114 @@
     initNavbar();
     loadDashboard();
 
-    function showSection(name) {
+    function showSection(name, e) {
       document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
       document.getElementById(`section-${name}`).classList.add('active');
-      event.target.classList.add('active');
+      if (e && e.target) e.target.classList.add('active');
       if (name === 'dashboard') loadDashboard();
+      else if (name === 'cashflow') loadCashflow();
       else if (name === 'menu') loadMenuAdmin();
       else if (name === 'orders') loadOrders();
       else if (name === 'reservations') loadReservations();
     }
 
+    // ── Dashboard ──────────────────────────────────────
     async function loadDashboard() {
       try {
         const data = await Admin.dashboard();
         document.getElementById('stat-cards').innerHTML = `
-          <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">${formatCurrency(data.total_revenue)}</div><div class="stat-sub">From delivered orders</div></div>
-          <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${data.total_orders}</div><div class="stat-sub">${data.pending_orders} pending</div></div>
-          <div class="stat-card"><div class="stat-label">Reservations</div><div class="stat-value">${data.total_reservations}</div><div class="stat-sub">${data.pending_reservations} pending</div></div>
-          <div class="stat-card"><div class="stat-label">Customers</div><div class="stat-value">${data.total_customers}</div><div class="stat-sub">Registered users</div></div>
+          <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">${formatCurrency(data.total_revenue)}</div>
+            <div class="stat-sub">From delivered orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-value">${data.total_orders}</div>
+            <div class="stat-sub">${data.pending_orders} pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Reservations</div>
+            <div class="stat-value">${data.total_reservations}</div>
+            <div class="stat-sub">${data.pending_reservations} pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Customers</div>
+            <div class="stat-value">${data.total_customers}</div>
+            <div class="stat-sub">Registered users</div>
+          </div>
         `;
       } catch (e) { showToast(e.message, 'error'); }
     }
 
+    // ── Cash Flow ──────────────────────────────────────
+    async function loadCashflow() {
+      const tableEl = document.getElementById('cashflow-table');
+      const summaryEl = document.getElementById('cashflow-summary');
+      tableEl.innerHTML = `<div class="spinner"></div>`;
+      summaryEl.innerHTML = '';
+      try {
+        const rows = await Admin.cashflow();
+        if (!rows.length) {
+          tableEl.innerHTML = `<p style="color:var(--text-muted)">No order data yet. Orders will appear here once placed.</p>`;
+          return;
+        }
+
+        // Summary pills
+        const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+        const totalOrders = rows.reduce((s, r) => s + r.order_count, 0);
+        const today = new Date().toISOString().split('T')[0];
+        const todayRow = rows.find(r => r.date === today);
+
+        summaryEl.innerHTML = `
+          <div class="summary-pill">
+            <div class="label">All-time Revenue</div>
+            <div class="value revenue-positive">${formatCurrency(totalRevenue)}</div>
+          </div>
+          <div class="summary-pill">
+            <div class="label">Total Orders</div>
+            <div class="value">${totalOrders}</div>
+          </div>
+          <div class="summary-pill">
+            <div class="label">Today's Revenue</div>
+            <div class="value revenue-positive">${todayRow ? formatCurrency(todayRow.revenue) : '₹0'}</div>
+          </div>
+          <div class="summary-pill">
+            <div class="label">Today's Orders</div>
+            <div class="value">${todayRow ? todayRow.order_count : 0}</div>
+          </div>
+        `;
+
+        // Table
+        tableEl.innerHTML = `
+          <table>
+            <thead><tr>
+              <th>Date</th>
+              <th>Orders</th>
+              <th>Revenue (Delivered)</th>
+              <th>Avg per Order</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map(r => {
+                const avg = r.order_count > 0 ? r.revenue / r.order_count : 0;
+                const isToday = r.date === today;
+                return `<tr class="${isToday ? 'cashflow-today' : ''}">
+                  <td>${isToday ? '📅 Today' : r.date} ${isToday ? '<span style="font-size:10px;color:var(--accent);margin-left:6px">TODAY</span>' : ''}</td>
+                  <td>${r.order_count}</td>
+                  <td class="revenue-positive">${formatCurrency(r.revenue)}</td>
+                  <td style="color:var(--text-muted)">${r.revenue > 0 ? formatCurrency(avg) : '—'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (e) {
+        tableEl.innerHTML = `<p style="color:var(--text-muted)">${e.message}</p>`;
+      }
+    }
+
+    // ── Menu ───────────────────────────────────────────
     async function loadMenuAdmin() {
       try {
         const items = await Menu.getAll();
@@ -160,15 +327,21 @@
       } catch (e) { showToast(e.message, 'error'); }
     }
 
+    // ── Orders ─────────────────────────────────────────
     async function loadOrders() {
       try {
         const orders = await Orders.allOrders();
         const el = document.getElementById('orders-table');
         const statusOptions = ['pending','confirmed','preparing','delivered','cancelled'];
         el.innerHTML = `<div class="table-wrap"><table>
-          <tr><th>ID</th><th>User</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr>
+          <tr><th>ID</th><th>Table</th><th>User</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr>
           ${orders.reverse().map(o => `<tr>
-            <td>#${o.id}</td><td>User #${o.user_id}</td>
+            <td>#${o.id}</td>
+            <td><strong>🪑 ${o.table_number}</strong></td>
+            <td>User #${o.user_id}</td>
+            <td style="font-size:12px;color:var(--text-muted)">
+              ${o.items.map(i => `${i.name || '#'+i.menu_item_id} ×${i.quantity}`).join(', ')}
+            </td>
             <td>${formatCurrency(o.total_price)}</td>
             <td>${statusBadge(o.status)}</td>
             <td style="font-size:12px;color:var(--text-muted)">${o.created_at ? formatDateTime(o.created_at) : '—'}</td>
@@ -187,16 +360,20 @@
       } catch (e) { showToast(e.message, 'error'); }
     }
 
+    // ── Reservations ───────────────────────────────────
     async function loadReservations() {
       try {
         const rsvps = await Reservations.allReservations();
         const el = document.getElementById('reservations-table');
         const statusOptions = ['pending','confirmed','cancelled'];
         el.innerHTML = `<div class="table-wrap"><table>
-          <tr><th>ID</th><th>User</th><th>Date</th><th>Time</th><th>Guests</th><th>Status</th><th>Update</th></tr>
+          <tr><th>ID</th><th>Table</th><th>User</th><th>Date</th><th>Time</th><th>Guests</th><th>Status</th><th>Update</th></tr>
           ${rsvps.reverse().map(r => `<tr>
-            <td>#${r.id}</td><td>User #${r.user_id}</td>
-            <td>${formatDate(r.date)}</td><td>${r.time}</td>
+            <td>#${r.id}</td>
+            <td><strong>🪑 ${r.table_number}</strong></td>
+            <td>User #${r.user_id}</td>
+            <td>${r.date}</td>
+            <td>${r.time}</td>
             <td>👥 ${r.guests}</td>
             <td>${statusBadge(r.status)}</td>
             <td><select class="form-select" style="width:120px;padding:5px 8px;font-size:12px" onchange="updateReservationStatus(${r.id}, this.value)">
@@ -214,7 +391,7 @@
       } catch (e) { showToast(e.message, 'error'); }
     }
 
-    // Menu item CRUD modal
+    // ── Menu Modal ─────────────────────────────────────
     function openMenuModal(item = null) {
       document.getElementById('m-id').value = item ? item.id : '';
       document.getElementById('m-name').value = item ? item.name : '';
@@ -226,12 +403,8 @@
       document.getElementById('modal-title').textContent = item ? 'Edit Menu Item' : 'Add Menu Item';
       document.getElementById('menu-modal').classList.add('open');
     }
-
     function editMenuItem(item) { openMenuModal(item); }
-
-    function closeMenuModal() {
-      document.getElementById('menu-modal').classList.remove('open');
-    }
+    function closeMenuModal() { document.getElementById('menu-modal').classList.remove('open'); }
 
     async function saveMenuItem() {
       const id = document.getElementById('m-id').value;
@@ -262,6 +435,121 @@
         showToast('Item deleted', 'success');
         loadMenuAdmin();
       } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // ── New Order Modal ────────────────────────────────
+    let noMenuItems = [];
+    let noQtys = {};
+
+    async function openNewOrderModal() {
+      noQtys = {};
+      document.getElementById('no-table').value = '';
+      document.getElementById('new-order-modal').classList.add('open');
+      const listEl = document.getElementById('no-menu-list');
+      listEl.innerHTML = '<div class="spinner"></div>';
+      try {
+        noMenuItems = (await Menu.getAll()).filter(i => i.is_available);
+        renderOrderItems();
+      } catch (e) {
+        listEl.innerHTML = `<p style="color:var(--text-muted)">${e.message}</p>`;
+      }
+    }
+
+    function renderOrderItems() {
+      const listEl = document.getElementById('no-menu-list');
+      listEl.innerHTML = noMenuItems.map(item => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div>
+            <div style="font-weight:600;font-size:13px">${item.name}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${item.category} · ${formatCurrency(item.price)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="qty-btn" onclick="noChangeQty(${item.id}, -1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface-alt,#222);cursor:pointer;font-size:16px">−</button>
+            <span style="min-width:20px;text-align:center;font-weight:600" id="no-qty-${item.id}">${noQtys[item.id] || 0}</span>
+            <button class="qty-btn" onclick="noChangeQty(${item.id}, 1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface-alt,#222);cursor:pointer;font-size:16px">+</button>
+          </div>
+        </div>
+      `).join('');
+      updateOrderSummary();
+    }
+
+    function noChangeQty(itemId, delta) {
+      noQtys[itemId] = Math.max(0, (noQtys[itemId] || 0) + delta);
+      const el = document.getElementById(`no-qty-${itemId}`);
+      if (el) el.textContent = noQtys[itemId];
+      updateOrderSummary();
+    }
+
+    function updateOrderSummary() {
+      let total = 0;
+      const selected = [];
+      noMenuItems.forEach(item => {
+        const qty = noQtys[item.id] || 0;
+        if (qty > 0) {
+          total += item.price * qty;
+          selected.push(`${item.name} ×${qty}`);
+        }
+      });
+      document.getElementById('no-total').textContent = formatCurrency(total);
+      document.getElementById('no-selected-items').textContent = selected.length ? selected.join(', ') : 'No items selected';
+    }
+
+    function closeNewOrderModal() {
+      document.getElementById('new-order-modal').classList.remove('open');
+    }
+
+    async function submitNewOrder() {
+      const tableNumber = parseInt(document.getElementById('no-table').value);
+      if (!tableNumber || tableNumber < 1 || tableNumber > 20) {
+        showToast('Enter a valid table number (1–20)', 'error'); return;
+      }
+      const items = noMenuItems
+        .filter(item => (noQtys[item.id] || 0) > 0)
+        .map(item => ({ menu_item_id: item.id, name: item.name, quantity: noQtys[item.id], price: item.price }));
+      if (!items.length) { showToast('Add at least one item', 'error'); return; }
+
+      const btn = document.getElementById('no-submit-btn');
+      btn.disabled = true; btn.textContent = 'Placing…';
+      try {
+        await Orders.create(items, tableNumber);
+        showToast(`Order placed for Table ${tableNumber} ✅`, 'success');
+        closeNewOrderModal();
+        loadOrders();
+      } catch (e) { showToast(e.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Place Order';
+    }
+
+    // ── New Reservation Modal ──────────────────────────
+    function openNewReservationModal() {
+      document.getElementById('nr-date').value = '';
+      document.getElementById('nr-time').value = '';
+      document.getElementById('nr-guests').value = '';
+      document.getElementById('nr-table').value = '';
+      document.getElementById('nr-date').min = new Date().toISOString().split('T')[0];
+      document.getElementById('new-res-modal').classList.add('open');
+    }
+
+    function closeNewReservationModal() {
+      document.getElementById('new-res-modal').classList.remove('open');
+    }
+
+    async function submitNewReservation() {
+      const date = document.getElementById('nr-date').value;
+      const time = document.getElementById('nr-time').value;
+      const guests = parseInt(document.getElementById('nr-guests').value);
+      const tableNumber = parseInt(document.getElementById('nr-table').value);
+      if (!date || !time || !guests || !tableNumber) { showToast('Fill in all fields', 'error'); return; }
+      if (tableNumber < 1 || tableNumber > 20) { showToast('Table must be 1–20', 'error'); return; }
+
+      const btn = document.getElementById('nr-submit-btn');
+      btn.disabled = true; btn.textContent = 'Booking…';
+      try {
+        await Reservations.create(date, time, guests, tableNumber);
+        showToast(`Table ${tableNumber} reserved ✅`, 'success');
+        closeNewReservationModal();
+        loadReservations();
+      } catch (e) { showToast(e.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Book Table';
     }
 
     function initNavbar() {

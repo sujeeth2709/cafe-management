@@ -38,9 +38,9 @@
     initNavbar();
 
     async function loadOrders() {
+      const el = document.getElementById('orders-list');
       try {
         const orders = await Orders.myOrders();
-        const el = document.getElementById('orders-list');
         if (!orders.length) {
           el.innerHTML = `<div class="empty-state">
             <div style="font-size:2.5rem;margin-bottom:12px">📋</div>
@@ -55,7 +55,8 @@
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
               <div>
                 <div style="font-weight:600;margin-bottom:2px">Order #${order.id}</div>
-                <div style="font-size:12px;color:var(--text-muted)">${order.created_at ? formatDateTime(order.created_at) : '—'}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${order.created_at ? new Date(order.created_at).toLocaleString() : '—'}</div>
+                <div style="font-size:13px;margin-top:4px">🪑 Table ${order.table_number}</div>
               </div>
               <div style="text-align:right">
                 ${statusBadge(order.status)}
@@ -66,13 +67,13 @@
               <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Items</div>
               ${order.items.map(i => `
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-                  <span>Item #${i.menu_item_id} × ${i.quantity}</span>
+                  <span>${i.name || 'Item #' + i.menu_item_id} × ${i.quantity}</span>
                   <span style="color:var(--text-muted)">${formatCurrency(i.price * i.quantity)}</span>
                 </div>`).join('')}
             </div>
           </div>`).join('');
       } catch (e) {
-        document.getElementById('orders-list').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+        el.innerHTML = `<p style="color:var(--text-muted)">${e.message}</p>`;
       }
     }
 

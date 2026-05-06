@@ -38,17 +38,24 @@
             <li>Tables available daily 8 AM – 10 PM</li>
             <li>Reservations confirmed within 2 hours</li>
             <li>Group bookings welcome (up to 20 guests)</li>
-            <li>Special occasions? Add a note after booking</li>
+            <li>Tables numbered 1–20 available</li>
           </ul>
         </div>
 
         <div style="margin-top:36px">
-          <h3 style="margin-bottom:16px;font-size:1.1rem">My Reservations</h3>
-          <div id="my-reservations"><div class="spinner"></div></div>
+          <div style="display:flex;gap:10px;margin-bottom:20px">
+            <button id="tab-new" class="btn btn-primary btn-sm" onclick="switchTab('new')">+ New Reservation</button>
+            <button id="tab-existing" class="btn btn-secondary btn-sm" onclick="switchTab('existing')">📋 My Reservations</button>
+          </div>
+          <div id="panel-new"></div>
+          <div id="panel-existing" style="display:none">
+            <div id="my-reservations"><div class="spinner"></div></div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
+      <!-- Reservation form card -->
+      <div class="card" id="form-card">
         <h3 style="margin-bottom:20px">New Reservation</h3>
         <div class="form-group">
           <label class="form-label">Date</label>
@@ -61,6 +68,10 @@
         <div class="form-group">
           <label class="form-label">Number of Guests</label>
           <input id="res-guests" type="number" class="form-input" min="1" max="20" placeholder="2" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Table Number <span style="color:var(--text-muted);font-size:12px">(1–20)</span></label>
+          <input id="res-table" type="number" class="form-input" min="1" max="20" placeholder="e.g. 5" />
         </div>
         <button class="btn btn-primary btn-full" id="book-btn" onclick="bookTable()">Book Table</button>
         <p style="font-size:12px;color:var(--text-muted);margin-top:12px;text-align:center">
@@ -75,9 +86,16 @@
   <script src="../scripts/utils.js"></script>
   <script>
     initNavbar();
-
-    // Set min date to today
     document.getElementById('res-date').min = new Date().toISOString().split('T')[0];
+
+    function switchTab(tab) {
+      const isNew = tab === 'new';
+      document.getElementById('panel-existing').style.display = isNew ? 'none' : 'block';
+      document.getElementById('form-card').style.display = isNew ? '' : 'none';
+      document.getElementById('tab-new').className = isNew ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+      document.getElementById('tab-existing').className = isNew ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm';
+      if (!isNew) loadMyReservations();
+    }
 
     async function bookTable() {
       if (!isLoggedIn()) {
@@ -88,16 +106,20 @@
       const date = document.getElementById('res-date').value;
       const time = document.getElementById('res-time').value;
       const guests = parseInt(document.getElementById('res-guests').value);
+      const tableNumber = parseInt(document.getElementById('res-table').value);
       const btn = document.getElementById('book-btn');
-      if (!date || !time || !guests) return showToast('Please fill in all fields', 'error');
+
+      if (!date || !time || !guests || !tableNumber) return showToast('Please fill in all fields', 'error');
+      if (tableNumber < 1 || tableNumber > 20) return showToast('Table number must be 1–20', 'error');
+
       btn.disabled = true; btn.textContent = 'Booking…';
       try {
-        await Reservations.create(date, time + ':00', guests);
-        showToast('Table reserved! ✅', 'success');
+        await Reservations.create(date, time, guests, tableNumber);
+        showToast(`Table ${tableNumber} reserved! ✅`, 'success');
         document.getElementById('res-date').value = '';
         document.getElementById('res-time').value = '';
         document.getElementById('res-guests').value = '';
-        loadMyReservations();
+        document.getElementById('res-table').value = '';
       } catch (e) {
         showToast(e.message, 'error');
       }
@@ -106,7 +128,11 @@
 
     async function loadMyReservations() {
       const el = document.getElementById('my-reservations');
-      if (!isLoggedIn()) { el.innerHTML = `<p style="color:var(--text-muted);font-size:13px">Sign in to see your reservations</p>`; return; }
+      if (!isLoggedIn()) {
+        el.innerHTML = `<p style="color:var(--text-muted);font-size:13px">Sign in to see your reservations</p>`;
+        return;
+      }
+      el.innerHTML = `<div class="spinner"></div>`;
       try {
         const reservations = await Reservations.myReservations();
         if (!reservations.length) {
@@ -114,15 +140,17 @@
           return;
         }
         el.innerHTML = reservations.reverse().map(r => `
-          <div class="reservation-card">
-            <div class="reservation-card-header">
-              <span class="reservation-date">${formatDate(r.date)} at ${r.time}</span>
+          <div style="margin-bottom:12px;padding:14px;border:1px solid var(--border);border-radius:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-weight:600">${r.date} at ${r.time}</span>
               ${statusBadge(r.status)}
             </div>
-            <div class="reservation-details">👥 ${r.guests} guest${r.guests > 1 ? 's' : ''} · Reservation #${r.id}</div>
+            <div style="font-size:13px;color:var(--text-muted)">
+              👥 ${r.guests} guest${r.guests > 1 ? 's' : ''} &nbsp;·&nbsp; 🪑 Table ${r.table_number} &nbsp;·&nbsp; #${r.id}
+            </div>
           </div>`).join('');
       } catch (e) {
-        el.innerHTML = `<p style="color:var(--danger);font-size:13px">${e.message}</p>`;
+        el.innerHTML = `<p style="color:var(--text-muted);font-size:13px">${e.message}</p>`;
       }
     }
 
@@ -137,8 +165,6 @@
       }
       updateCartBadge();
     }
-
-    loadMyReservations();
   </script>
 </body>
 </html>

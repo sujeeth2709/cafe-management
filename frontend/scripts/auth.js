@@ -26,13 +26,13 @@ function requireAuth() {
 function requireAdmin() {
   const user = getCurrentUser();
   if (!user || user.role !== 'admin') {
-    window.location.href = '/frontend/pages/index.html';
+    window.location.href = '/frontend/pages/login.html';
   }
 }
 
 function redirectIfLoggedIn() {
   if (isLoggedIn()) {
-    window.location.href = '/frontend/pages/index.html';
+    window.location.href = '/frontend/pages/admin/index.html'; // All users go to admin panel
   }
 }
 
