@@ -28,7 +28,6 @@
   <div class="page-content container">
     <h1 class="page-title">Your Cart</h1>
     <p class="page-subtitle">Review your order before placing it</p>
-
     <div id="cart-content"></div>
   </div>
 
@@ -83,21 +82,20 @@
             <div class="cart-summary-row"><span>Subtotal</span><span>${formatCurrency(CartStore.total())}</span></div>
             <div class="cart-summary-row"><span>Tax (5%)</span><span>${formatCurrency(CartStore.total() * 0.05)}</span></div>
             <div class="cart-summary-row total"><span>Total</span><span>${formatCurrency(CartStore.total() * 1.05)}</span></div>
-            <button class="btn btn-primary btn-full" style="margin-top:20px" id="checkout-btn" onclick="checkout()">Place Order</button>
+
+            <div class="form-group" style="margin-top:20px">
+              <label class="form-label" style="font-size:13px">🪑 Table Number <span style="color:var(--text-muted);font-size:11px">(1–20, required)</span></label>
+              <input id="table-number" type="number" class="form-input" min="1" max="20" placeholder="Enter your table number" style="margin-top:6px" />
+            </div>
+
+            <button class="btn btn-primary btn-full" style="margin-top:12px" id="checkout-btn" onclick="checkout()">Place Order</button>
             <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="CartStore.clear();render()">Clear Cart</button>
           </div>
         </div>`;
     }
 
-    function changeQty(id, qty) {
-      CartStore.updateQty(id, qty);
-      render();
-    }
-
-    function removeItem(id) {
-      CartStore.remove(id);
-      render();
-    }
+    function changeQty(id, qty) { CartStore.updateQty(id, qty); render(); }
+    function removeItem(id) { CartStore.remove(id); render(); }
 
     async function checkout() {
       if (!isLoggedIn()) {
@@ -105,17 +103,29 @@
         setTimeout(() => window.location.href = 'login.html', 1000);
         return;
       }
+
+      const tableInput = document.getElementById('table-number');
+      const tableNumber = parseInt(tableInput ? tableInput.value : '0');
+      if (!tableNumber || tableNumber < 1 || tableNumber > 20) {
+        showToast('Please enter a valid table number (1–20)', 'error');
+        return;
+      }
+
       const cart = CartStore.get();
       const btn = document.getElementById('checkout-btn');
       btn.disabled = true; btn.textContent = 'Placing order…';
+
       try {
-        // Validate cart items first
-        await Cart.validate(cart.map(i => i.id));
-        // Place order
-        const items = cart.map(i => ({ menu_item_id: i.id, quantity: i.qty }));
-        await Orders.create(items);
+        const items = cart.map(i => ({
+          menu_item_id: i.id,
+          name: i.name,
+          quantity: i.qty,
+          price: i.price
+        }));
+
+        await Orders.create(items, tableNumber);
         CartStore.clear();
-        showToast('Order placed successfully! 🎉', 'success');
+        showToast(`Order placed for Table ${tableNumber}! 🎉`, 'success');
         setTimeout(() => window.location.href = 'orders.html', 1200);
       } catch (e) {
         showToast(e.message, 'error');

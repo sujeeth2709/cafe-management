@@ -46,16 +46,13 @@
       if (!email || !password) return showToast('Please fill in all fields', 'error');
       btn.disabled = true; btn.textContent = 'Signing in…';
       try {
-        const { access_token } = await Auth.login(email, password);
-        // Decode user id from token (JWT) or re-fetch — store token first then get profile
-        localStorage.setItem('token', access_token);
-        // Fetch user info via /api/auth/me if available, else use register approach
-        // For now decode payload from JWT
-        const payload = JSON.parse(atob(access_token.split('.')[1]));
-        // We store minimal info; role will be fetched on admin page
-        localStorage.setItem('user', JSON.stringify({ id: payload.sub, name: email.split('@')[0], email, role: 'customer' }));
-        showToast('Welcome back!', 'success');
-        setTimeout(() => window.location.href = 'index.html', 800);
+        const data = await Auth.login(email, password);
+        // Backend returns { token, user: { id, name, email, role } }
+        saveSession(data.token, data.user);
+        showToast(`Welcome back, ${data.user.name.split(' ')[0]}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'admin/index.html'; // All users go to admin panel
+        }, 800);
       } catch (e) {
         showToast(e.message, 'error');
         btn.disabled = false; btn.textContent = 'Sign In';
