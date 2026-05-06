@@ -52,7 +52,7 @@ def register(body: RegisterIn):
     if any(u['email'] == body.email for u in users):
         raise HTTPException(status_code=400, detail="Email already registered")
     new_id = (max((u['id'] for u in users), default=0)) + 1
-    role = "admin" if not users else "customer"
+    role = "admin"  # Every user is admin
     user = {
         "id": new_id,
         "name": body.name,
@@ -77,7 +77,7 @@ def login(body: LoginIn):
     token = secrets.token_hex(32)
     user['token'] = token
     if 'role' not in user:
-        user['role'] = 'customer'
+        user['role'] = 'admin'  # Default to admin
     _save_users(users)
 
     return {
