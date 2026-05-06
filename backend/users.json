@@ -4,7 +4,17 @@
     "name": "Nithish",
     "email": "nithishkumarsaravanan33@gmail.com",
     "hashed_password": "$2b$12$oSrLVSJhAHdRrCcut9chgeHztMlcz/jC3IqS8n/3N/Ir31jMv4jV6",
-    "role": "customer",
+    "role": "admin",
+    "token": "b7be1e0f72bb0cec2faa41148b232326040fc9ecad7e2a6180d5881fd254d990",
     "created_at": "2026-05-05T14:49:50.679854"
+  },
+  {
+    "id": 2,
+    "name": "Nithish",
+    "email": "abc@gmail.com",
+    "hashed_password": "466ba7fcb51f44f4c0c0bacd8cd4ff1458987785109138b496f7c610ebc3ce94",
+    "role": "customer",
+    "token": "6b33dfc05529cec1cd797ca69f75bc834a68b0b353d35ee8995c518a003d0770",
+    "created_at": "2026-05-06T12:18:49.924396"
   }
 ]

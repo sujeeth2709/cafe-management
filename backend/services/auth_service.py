@@ -1,15 +1,12 @@
-# services/auth_service.py
-from datetime import datetime, timedelta
-from jose import jwt
-from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-
+# auth_service.py
+# NOTE: This project uses simple token auth (secrets.token_hex stored in users.json).
+# JWT functions below are unused and kept only for reference. Do not import from here.
 
 def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
+    raise NotImplementedError("JWT not used in this project. See routers/auth.py.")
 
 def decode_access_token(token: str) -> dict:
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    raise NotImplementedError("JWT not used in this project. See routers/_auth_helper.py.")
+
+# Alias in case any old code calls decode_token
+decode_token = decode_access_token
