@@ -9,5 +9,5 @@ class User:
     name: str
     email: str
     hashed_password: str
-    role: str = "customer"
+    role: str = "admin"  # Every user is admin
     created_at: Optional[str] = None
