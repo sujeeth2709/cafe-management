@@ -1,51 +1,67 @@
-from sqlalchemy.orm import Session
-from models.order import Order, OrderItem
-from models.menu import MenuItem
-from schemas.order import OrderCreate
-from fastapi import HTTPException
+import json
+import os
+from datetime import datetime
+
+ORDERS_FILE = os.path.join(os.path.dirname(__file__), '..', 'orders.json')
 
 
+def _load():
+    if not os.path.exists(ORDERS_FILE):
+        return []
+    with open(ORDERS_FILE, 'r') as f:
+        return json.load(f)
 
 
-def create_order(db: Session, order: OrderCreate, user_id: int):
-    total = 0
-    order_items = []
-
-    for item in order.items:
-        menu_item = db.query(MenuItem).filter(MenuItem.id == item.menu_item_id).first()
-        if not menu_item:
-            raise HTTPException(status_code=404, detail=f"Menu item {item.menu_item_id} not found")
-        if not menu_item.is_available:
-            raise HTTPException(status_code=400, detail=f"{menu_item.name} is not available")
-        item_total = menu_item.price * item.quantity
-        total += item_total
-        order_items.append({"menu_item_id": item.menu_item_id, "quantity": item.quantity, "price": menu_item.price})
-
-    new_order = Order(user_id=user_id, total_price=total)
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
-
-    for oi in order_items:
-        db.add(OrderItem(order_id=new_order.id, **oi))
-    db.commit()
-    db.refresh(new_order)
-    return new_order
+def _save(data):
+    with open(ORDERS_FILE, 'w') as f:
+        json.dump(data, f, indent=2, default=str)
 
 
-def get_orders_by_user(db: Session, user_id: int):
-    return db.query(Order).filter(Order.user_id == user_id).all()
-
-
-def get_all_orders(db: Session):
-    return db.query(Order).all()
-
-
-def update_order_status(db: Session, order_id: int, status: str):
-    order = db.query(Order).filter(Order.id == order_id).first()
-    if not order:
-        return None
-    order.status = status
-    db.commit()
-    db.refresh(order)
+def create_order(user_id: int, items: list, table_number: int):
+    orders = _load()
+    new_id = (max((o['id'] for o in orders), default=0)) + 1
+    total = sum(i['price'] * i['quantity'] for i in items)
+    order = {
+        "id": new_id,
+        "user_id": user_id,
+        "table_number": table_number,
+        "items": items,
+        "total_price": round(total, 2),
+        "status": "pending",
+        "created_at": datetime.now().isoformat()
+    }
+    orders.append(order)
+    _save(orders)
     return order
+
+
+def get_orders_by_user(user_id: int):
+    return [o for o in _load() if o['user_id'] == user_id]
+
+
+def get_all_orders():
+    return _load()
+
+
+def update_order_status(order_id: int, status: str):
+    orders = _load()
+    for o in orders:
+        if o['id'] == order_id:
+            o['status'] = status
+            _save(orders)
+            return o
+    return None
+
+
+def get_daily_summary():
+    orders = _load()
+    today = datetime.now().date().isoformat()
+    summary = {}
+    for o in orders:
+        day = o['created_at'][:10]
+        if day not in summary:
+            summary[day] = {"date": day, "order_count": 0, "revenue": 0.0}
+        summary[day]["order_count"] += 1
+        if o['status'] == 'delivered':
+            summary[day]["revenue"] += o['total_price']
+    return sorted(summary.values(), key=lambda x: x['date'], reverse=True)

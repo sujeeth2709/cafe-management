@@ -1,0 +1,227 @@
+[
+  {
+    "id": 1,
+    "name": "Espresso",
+    "category": "Coffee",
+    "price": 80,
+    "description": "Rich, bold single shot of pure espresso",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 2,
+    "name": "Cappuccino",
+    "category": "Coffee",
+    "price": 120,
+    "description": "Espresso with steamed milk and thick foam",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 3,
+    "name": "Café Latte",
+    "category": "Coffee",
+    "price": 130,
+    "description": "Smooth espresso with creamy steamed milk",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 4,
+    "name": "Cold Brew",
+    "category": "Coffee",
+    "price": 150,
+    "description": "Slow-steeped cold brew, served over ice",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 5,
+    "name": "Mocha",
+    "category": "Coffee",
+    "price": 140,
+    "description": "Espresso blended with rich chocolate and milk",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 6,
+    "name": "Masala Chai",
+    "category": "Tea",
+    "price": 60,
+    "description": "Spiced Indian tea brewed with ginger and cardamom",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 7,
+    "name": "Green Tea",
+    "category": "Tea",
+    "price": 70,
+    "description": "Light, antioxidant-rich Japanese green tea",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 8,
+    "name": "Mango Lassi",
+    "category": "Cold Drinks",
+    "price": 110,
+    "description": "Chilled yogurt drink blended with Alphonso mango",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 9,
+    "name": "Fresh Lime Soda",
+    "category": "Cold Drinks",
+    "price": 80,
+    "description": "Sparkling soda with freshly squeezed lime, sweet or salted",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 10,
+    "name": "Strawberry Smoothie",
+    "category": "Cold Drinks",
+    "price": 130,
+    "description": "Fresh strawberries blended with yogurt and honey",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 11,
+    "name": "Masala Dosa",
+    "category": "South Indian",
+    "price": 120,
+    "description": "Crispy rice crepe filled with spiced potato, served with sambar and chutney",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 12,
+    "name": "Idli Sambar",
+    "category": "South Indian",
+    "price": 90,
+    "description": "Steamed rice cakes served with lentil sambar and coconut chutney",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 13,
+    "name": "Uttapam",
+    "category": "South Indian",
+    "price": 110,
+    "description": "Thick rice pancake topped with onion, tomato, and green chilli",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 14,
+    "name": "Pongal",
+    "category": "South Indian",
+    "price": 100,
+    "description": "Comforting rice and lentil dish with ghee, pepper, and cashews",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 15,
+    "name": "Vada",
+    "category": "South Indian",
+    "price": 70,
+    "description": "Crispy lentil fritters served with sambar and chutney",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 16,
+    "name": "Paneer Sandwich",
+    "category": "Snacks",
+    "price": 140,
+    "description": "Grilled sandwich stuffed with spiced paneer and veggies",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 17,
+    "name": "Veg Puff",
+    "category": "Snacks",
+    "price": 60,
+    "description": "Flaky pastry filled with spiced mixed vegetables",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 18,
+    "name": "French Fries",
+    "category": "Snacks",
+    "price": 100,
+    "description": "Golden crispy fries served with ketchup and mayo",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 19,
+    "name": "Samosa (2 pcs)",
+    "category": "Snacks",
+    "price": 50,
+    "description": "Crispy pastry filled with spiced potato and peas",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 20,
+    "name": "Spring Rolls",
+    "category": "Snacks",
+    "price": 110,
+    "description": "Crispy rolls stuffed with spiced cabbage and carrot",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 21,
+    "name": "Chocolate Brownie",
+    "category": "Desserts",
+    "price": 120,
+    "description": "Warm fudgy brownie with a scoop of vanilla ice cream",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 22,
+    "name": "Gulab Jamun",
+    "category": "Desserts",
+    "price": 80,
+    "description": "Soft milk-solid dumplings soaked in rose-flavored sugar syrup",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 23,
+    "name": "Rasgulla",
+    "category": "Desserts",
+    "price": 80,
+    "description": "Spongy cottage cheese balls in light sugar syrup",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 24,
+    "name": "Cheesecake Slice",
+    "category": "Desserts",
+    "price": 160,
+    "description": "Classic New York-style cheesecake with berry compote",
+    "image_url": null,
+    "is_available": true
+  },
+  {
+    "id": 25,
+    "name": "Rava Kesari",
+    "category": "Desserts",
+    "price": 70,
+    "description": "South Indian semolina halwa with saffron, ghee, and cashews",
+    "image_url": null,
+    "is_available": true
+  }
+]
