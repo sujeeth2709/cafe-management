@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 from database import Base
 
 
+
 class Order(Base):
     __tablename__ = "orders"
 
@@ -15,6 +16,7 @@ class Order(Base):
 
     items = relationship("OrderItem", back_populates="order")
     user = relationship("User")
+
 
 
 class OrderItem(Base):

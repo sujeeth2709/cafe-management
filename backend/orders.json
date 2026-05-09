@@ -136,7 +136,7 @@
       }
     ],
     "total_price": 400.0,
-    "status": "delivered",
+    "status": "confirmed",
     "created_at": "2026-05-06T18:51:17.820810"
   },
   {

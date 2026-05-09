@@ -1,11 +1,8 @@
 const BASE_URL = 'http://127.0.0.1:8000';
 
 function getToken() {
-  // CHANGED: Use sessionStorage instead of localStorage
-  return sessionStorage.getItem('token'); 
+  return localStorage.getItem('token');
 }
-
-// ... rest of your api.js code remains exactly the same
 
 async function apiFetch(path, options = {}) {
   const token = getToken();
