@@ -138,5 +138,33 @@
     "total_price": 400.0,
     "status": "confirmed",
     "created_at": "2026-05-06T18:51:17.820810"
+  },
+  {
+    "id": 6,
+    "user_id": 10,
+    "table_number": 5,
+    "items": [
+      {
+        "menu_item_id": 1,
+        "name": "Espresso",
+        "quantity": 1,
+        "price": 80.0
+      },
+      {
+        "menu_item_id": 2,
+        "name": "Cappuccino",
+        "quantity": 1,
+        "price": 120.0
+      },
+      {
+        "menu_item_id": 3,
+        "name": "Caf\u00e9 Latte",
+        "quantity": 1,
+        "price": 130.0
+      }
+    ],
+    "total_price": 330.0,
+    "status": "delivered",
+    "created_at": "2026-05-09T09:52:05.164854"
   }
 ]

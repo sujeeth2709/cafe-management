@@ -61,5 +61,32 @@
     "role": "admin",
     "token": "9da0ece2da460841d1be920e980e891393ac2d8f9059f086106ca17137685e7c",
     "created_at": "2026-05-06T19:59:00.741174"
+  },
+  {
+    "id": 8,
+    "name": "sujeeth",
+    "email": "ss2@gmail.com",
+    "hashed_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "role": "admin",
+    "token": "d266f158cdf88813350b3ca17b09600ccf840e13695aef3590d118e57dbbea68",
+    "created_at": "2026-05-08T22:04:43.837380"
+  },
+  {
+    "id": 9,
+    "name": "sujeeth",
+    "email": "suj@gmail.com",
+    "hashed_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "role": "admin",
+    "token": "950805daa886ad7ebd2c40420edb2f842556eff2ffc31a5983846a2a5fa83923",
+    "created_at": "2026-05-08T22:18:57.740997"
+  },
+  {
+    "id": 10,
+    "name": "nknk",
+    "email": "a@gmail.com",
+    "hashed_password": "f84cdc2564441bb489174122b9ba5a4f8c92df198c33d0dc2affe1429d37f59b",
+    "role": "admin",
+    "token": "099518321e4d8f4eb0683e0b2f9c7852a3999674a0d276b4bf66eb5ac4b4fe4a",
+    "created_at": "2026-05-09T09:51:06.036609"
   }
 ]

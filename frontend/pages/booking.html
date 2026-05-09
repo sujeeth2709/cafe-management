@@ -6,6 +6,9 @@
   <link rel="stylesheet" href="../styles/base.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/booking.css" />
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
 </head>
 <body>
   <div id="toast-container"></div>
@@ -54,16 +57,15 @@
         </div>
       </div>
 
-      <!-- Reservation form card -->
       <div class="card" id="form-card">
         <h3 style="margin-bottom:20px">New Reservation</h3>
         <div class="form-group">
           <label class="form-label">Date</label>
-          <input id="res-date" type="date" class="form-input" />
+          <input id="res-date" type="text" class="form-input" placeholder="Select Date" />
         </div>
         <div class="form-group">
           <label class="form-label">Time</label>
-          <input id="res-time" type="time" class="form-input" />
+          <input id="res-time" type="text" class="form-input" placeholder="Select Time" />
         </div>
         <div class="form-group">
           <label class="form-label">Number of Guests</label>
@@ -81,12 +83,26 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
   <script src="../scripts/api.js"></script>
   <script src="../scripts/auth.js"></script>
   <script src="../scripts/utils.js"></script>
   <script>
     initNavbar();
-    document.getElementById('res-date').min = new Date().toISOString().split('T')[0];
+    
+    // Initialize custom date and time pickers
+    flatpickr("#res-date", {
+      minDate: "today",
+      dateFormat: "Y-m-d",
+      disableMobile: "true"
+    });
+    flatpickr("#res-time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      disableMobile: "true"
+    });
 
     function switchTab(tab) {
       const isNew = tab === 'new';
@@ -158,12 +174,11 @@
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       const area = document.getElementById('nav-user-area');
       if (user) {
-        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
-          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>`;
       } else {
         area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
       }
-      updateCartBadge();
+      if(typeof updateCartBadge === 'function') updateCartBadge();
     }
   </script>
 </body>
