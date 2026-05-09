@@ -88,5 +88,14 @@
     "role": "admin",
     "token": "359228d1831192e52511a600c60cb5bf1ff6be5687e3dde2004dce85c7808ae2",
     "created_at": "2026-05-09T09:51:06.036609"
+  },
+  {
+    "id": 11,
+    "name": "ww",
+    "email": "w@gmail.com",
+    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
+    "role": "admin",
+    "token": "8a812433468c29c3db7e48b32b7f3e3a6f5fc799d1cf5e2da03182441554f485",
+    "created_at": "2026-05-09T17:49:45.141968"
   }
 ]
