@@ -5,7 +5,7 @@
   <title>Menu — CaféMaven</title>
   <link rel="stylesheet" href="../styles/base.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
-  <link rel="stylesheet" href="../styles/menu.css" />
+  <link rel="stylesheet" href="../styles/menu.css?v=2" />
 </head>
 <body>
   <div id="toast-container"></div>
@@ -34,7 +34,7 @@
       <button class="filter-btn active" data-cat="all">All</button>
     </div>
 
-    <div id="menu-grid" class="grid-3">
+    <div id="menu-grid" class="grid-2">
       <div class="spinner"></div>
     </div>
   </div>
@@ -86,13 +86,19 @@
               : `<span class="no-img">🍽</span>`}
           </div>
           <div class="menu-card-body">
-            <div class="menu-card-category">${item.category}</div>
-            <div class="menu-card-name">${item.name}</div>
-            <div class="menu-card-desc">${item.description || 'A delightful choice.'}</div>
+            <div>
+              <div class="menu-card-header">
+                <div>
+                  <div class="menu-card-category">${item.category}</div>
+                  <div class="menu-card-name">${item.name}</div>
+                </div>
+                <div class="menu-card-price">${formatCurrency(item.price)}</div>
+              </div>
+              <div class="menu-card-desc">${item.description || 'A delightful choice.'}</div>
+            </div>
             <div class="menu-card-footer">
-              <span class="menu-card-price">${formatCurrency(item.price)}</span>
               ${item.is_available
-                ? `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">Add to Cart</button>`
+                ? `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">+ Add to Cart</button>`
                 : `<span class="unavailable-badge">Unavailable</span>`}
             </div>
           </div>
@@ -106,11 +112,12 @@
     }
 
     function initNavbar() {
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const user = getCurrentUser();
       const area = document.getElementById('nav-user-area');
       if (user) {
         area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
-          ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}`;
+          ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
       } else {
         area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
       }
