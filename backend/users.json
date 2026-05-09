@@ -64,6 +64,7 @@
   },
   {
     "id": 8,
+<<<<<<< Updated upstream
     "name": "sujeeth",
     "email": "ss2@gmail.com",
     "hashed_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
@@ -115,5 +116,13 @@
     "role": "admin",
     "token": "67c4be634c31d4efe9061b38ee3f8863a863019bb84666c3d9b1dedb1a70fe41",
     "created_at": "2026-05-09T12:14:47.375956"
+=======
+    "name": "gowtham",
+    "email": "g@gmail.com",
+    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
+    "role": "admin",
+    "token": "27aaac3c78be2362d1ec505c7e78705f6f3b3bacd9722c0294733f707b00305d",
+    "created_at": "2026-05-08T15:32:19.967212"
+>>>>>>> Stashed changes
   }
 ]
