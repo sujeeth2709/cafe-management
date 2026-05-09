@@ -6,7 +6,9 @@
   <link rel="stylesheet" href="../../styles/base.css" />
   <link rel="stylesheet" href="../../styles/navbar.css" />
   <link rel="stylesheet" href="../../styles/admin.css" />
-  <link rel="stylesheet" href="../../styles/menu.css?v=3" />
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
   <style>
     .cashflow-table table { width:100%; border-collapse:collapse; }
     .cashflow-table th, .cashflow-table td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); font-size:13px; }
@@ -17,6 +19,19 @@
     .summary-pill { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 18px; flex:1; min-width:140px; }
     .summary-pill .label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:4px; }
     .summary-pill .value { font-size:1.4rem; font-weight:700; }
+    
+    /* Boxed Menu Items for Admin Modal */
+    .menu-box-item {
+      display:flex; align-items:center; justify-content:space-between; 
+      padding:14px; background:var(--surface2); 
+      border:1px solid rgba(201,150,62,0.2); 
+      border-radius:12px; margin-bottom: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .menu-box-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(201,150,62,0.1);
+    }
   </style>
 </head>
 <body>
@@ -68,15 +83,15 @@
             <h2 class="section-title">Menu Items</h2>
             <button class="btn btn-primary btn-sm" onclick="openMenuModal()">+ Add Item</button>
           </div>
-          <div id="menu-table" class="grid-horizontal"><div class="spinner"></div></div>
+          <div id="menu-table"><div class="spinner"></div></div>
         </div>
 
         <div class="admin-section" id="section-orders">
-          <div class="section-header">
+          <div class="section-header" style="justify-content: flex-start; gap: 24px;">
             <h2 class="section-title">All Orders</h2>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-primary btn-sm" onclick="openNewOrderModal()">+ New Order</button>
-              <button class="btn btn-secondary btn-sm" onclick="loadOrders()">↻ Refresh</button>
+            <div style="display:flex;gap:12px">
+              <button class="btn btn-primary btn-sm" style="box-shadow: 0 0 14px var(--accent); font-weight: 700; border: 1px solid var(--accent-light);" onclick="openNewOrderModal()">+ New Order</button>
+              <button class="btn btn-sm" style="background: var(--info); color: #fff; box-shadow: 0 0 10px rgba(91,155,213,0.5); font-weight: 600;" onclick="loadOrders()">↻ Refresh</button>
             </div>
           </div>
           <div id="orders-table"><div class="spinner"></div></div>
@@ -142,6 +157,12 @@
         <label class="form-label">🪑 Table Number (1–20)</label>
         <input id="no-table" type="number" class="form-input" min="1" max="20" placeholder="e.g. 5" />
       </div>
+      
+      <div class="form-group">
+        <label class="form-label">Search Menu</label>
+        <input id="no-search" type="text" class="form-input" placeholder="🔍 Find items..." onkeyup="filterNewOrderMenu()" style="border-color: var(--accent);" />
+      </div>
+
       <div class="form-group">
         <label class="form-label">Menu Items</label>
         <div id="no-menu-list" style="display:flex;flex-direction:column;gap:8px;margin-top:6px"><div class="spinner"></div></div>
@@ -164,11 +185,11 @@
       </div>
       <div class="form-group">
         <label class="form-label">Date</label>
-        <input id="nr-date" type="date" class="form-input" />
+        <input id="nr-date" type="text" class="form-input" placeholder="Select Date" />
       </div>
       <div class="form-group">
         <label class="form-label">Time</label>
-        <input id="nr-time" type="time" class="form-input" />
+        <input id="nr-time" type="text" class="form-input" placeholder="Select Time" />
       </div>
       <div class="form-group">
         <label class="form-label">Number of Guests</label>
@@ -182,13 +203,28 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
   <script src="../../scripts/api.js"></script>
   <script src="../../scripts/auth.js"></script>
   <script src="../../scripts/utils.js"></script>
   <script>
-    requireAdmin(); // Security Fix applied here!
+    requireAuth();
     initNavbar();
     loadDashboard();
+
+    // Initialize custom date and time pickers
+    flatpickr("#nr-date", {
+      minDate: "today",
+      dateFormat: "Y-m-d",
+      disableMobile: "true"
+    });
+    flatpickr("#nr-time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      disableMobile: "true"
+    });
 
     function showSection(name, e) {
       document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
@@ -244,6 +280,7 @@
           return;
         }
 
+        // Summary pills
         const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
         const totalOrders = rows.reduce((s, r) => s + r.order_count, 0);
         const today = new Date().toISOString().split('T')[0];
@@ -268,6 +305,7 @@
           </div>
         `;
 
+        // Table
         tableEl.innerHTML = `
           <table>
             <thead><tr>
@@ -295,48 +333,26 @@
       }
     }
 
-    // ── Menu Management (Updated to Horizontal Cards) ──
+    // ── Menu ───────────────────────────────────────────
     async function loadMenuAdmin() {
       try {
         const items = await Menu.getAll();
         const el = document.getElementById('menu-table');
-        
-        if (!items.length) { 
-          el.innerHTML = `<div style="grid-column: 1 / -1;"><p style="color:var(--text-muted)">No menu items yet</p></div>`; 
-          return; 
-        }
-        
-        el.innerHTML = items.map(item => `
-          <div class="menu-card" style="height: auto; min-height: 140px;">
-            <div class="menu-card-img" style="width: 130px;">
-              ${item.image_url
-                ? `<img src="${item.image_url}" alt="${item.name}" loading="lazy" />`
-                : `<span class="no-img" style="font-size:2rem">🍽</span>`}
-            </div>
-            <div class="menu-card-body" style="padding: 14px;">
-              <div>
-                <div class="menu-card-header">
-                  <div>
-                    <div class="menu-card-category" style="display:inline-block;margin-right:6px">${item.category}</div>
-                    <span style="font-size:11px;color:var(--text-muted)">ID: #${item.id}</span>
-                    <div class="menu-card-name">${item.name}</div>
-                  </div>
-                  <div class="menu-card-price" style="font-size: 1rem;">${formatCurrency(item.price)}</div>
-                </div>
-                <div class="menu-card-desc" style="-webkit-line-clamp: 1;">${item.description || ''}</div>
-              </div>
-              <div class="menu-card-footer" style="margin-top: 12px; justify-content: space-between;">
-                ${item.is_available
-                  ? `<span style="font-size:11px; color:var(--success); font-weight:600;">✅ Available</span>`
-                  : `<span class="unavailable-badge">❌ Unavailable</span>`}
-                <div style="display:flex; gap: 8px;">
-                  <button class="btn btn-secondary btn-sm" onclick='editMenuItem(${JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, '&quot;')})'>Edit</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteMenuItem(${item.id})">Delete</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('');
+        if (!items.length) { el.innerHTML = `<p style="color:var(--text-muted)">No menu items yet</p>`; return; }
+        el.innerHTML = `<div class="table-wrap"><table>
+          <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Actions</th></tr>
+          ${items.map(i => `<tr>
+            <td style="color:var(--text-muted)">#${i.id}</td>
+            <td><strong>${i.name}</strong><br><small style="color:var(--text-muted)">${i.description || ''}</small></td>
+            <td>${i.category}</td>
+            <td>${formatCurrency(i.price)}</td>
+            <td>${i.is_available ? '✅' : '❌'}</td>
+            <td style="display:flex;gap:8px">
+              <button class="btn btn-secondary btn-sm" onclick='editMenuItem(${JSON.stringify(i)})'>Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteMenuItem(${i.id})">Delete</button>
+            </td>
+          </tr>`).join('')}
+        </table></div>`;
       } catch (e) { showToast(e.message, 'error'); }
     }
 
@@ -457,6 +473,7 @@
     async function openNewOrderModal() {
       noQtys = {};
       document.getElementById('no-table').value = '';
+      document.getElementById('no-search').value = '';
       document.getElementById('new-order-modal').classList.add('open');
       const listEl = document.getElementById('no-menu-list');
       listEl.innerHTML = '<div class="spinner"></div>';
@@ -471,10 +488,10 @@
     function renderOrderItems() {
       const listEl = document.getElementById('no-menu-list');
       listEl.innerHTML = noMenuItems.map(item => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+        <div id="no-item-${item.id}" class="menu-box-item">
           <div>
-            <div style="font-weight:600;font-size:13px">${item.name}</div>
-            <div style="font-size:12px;color:var(--text-muted)">${item.category} · ${formatCurrency(item.price)}</div>
+            <div style="font-weight:600;font-size:14px;color:var(--text)">${item.name}</div>
+            <div style="font-size:12px;color:var(--accent)">${item.category} · <span style="color:var(--text-muted)">${formatCurrency(item.price)}</span></div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <button class="qty-btn" onclick="noChangeQty(${item.id}, -1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface-alt,#222);cursor:pointer;font-size:16px">−</button>
@@ -484,6 +501,16 @@
         </div>
       `).join('');
       updateOrderSummary();
+    }
+    
+    function filterNewOrderMenu() {
+      const q = document.getElementById('no-search').value.toLowerCase();
+      noMenuItems.forEach(item => {
+        const el = document.getElementById(`no-item-${item.id}`);
+        if (el) {
+          el.style.display = item.name.toLowerCase().includes(q) ? 'flex' : 'none';
+        }
+      });
     }
 
     function noChangeQty(itemId, delta) {
@@ -538,7 +565,6 @@
       document.getElementById('nr-time').value = '';
       document.getElementById('nr-guests').value = '';
       document.getElementById('nr-table').value = '';
-      document.getElementById('nr-date').min = new Date().toISOString().split('T')[0];
       document.getElementById('new-res-modal').classList.add('open');
     }
 
@@ -566,11 +592,10 @@
     }
 
     function initNavbar() {
-      const user = getCurrentUser();
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
       const area = document.getElementById('nav-user-area');
       if (user) {
-        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
-          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>`;
       } else {
         area.innerHTML = `<a href="../login.html" class="btn btn-sm btn-primary">Sign In</a>`;
       }

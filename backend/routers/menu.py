@@ -3,19 +3,23 @@ from pydantic import BaseModel
 from typing import Optional
 import json, os
 
+
 router = APIRouter(prefix="/api/menu", tags=["Menu"])
 
+
+#file path
 MENU_FILE = os.path.join(os.path.dirname(__file__), '..', 'menu.json')
 USERS_FILE = os.path.join(os.path.dirname(__file__), '..', 'users.json')
 
 
+#load config
 def _load():
     if not os.path.exists(MENU_FILE):
         return []
     with open(MENU_FILE) as f:
         return json.load(f)
 
-
+#save data
 def _save(data):
     with open(MENU_FILE, 'w') as f:
         json.dump(data, f, indent=2)
@@ -77,6 +81,8 @@ def update(item_id: int, body: MenuItemIn, authorization: Optional[str] = Header
             _save(items)
             return items[i]
     raise HTTPException(status_code=404, detail="Item not found")
+
+
 
 
 @router.delete("/{item_id}")

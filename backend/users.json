@@ -86,52 +86,7 @@
     "email": "a@gmail.com",
     "hashed_password": "f84cdc2564441bb489174122b9ba5a4f8c92df198c33d0dc2affe1429d37f59b",
     "role": "admin",
-    "token": "099518321e4d8f4eb0683e0b2f9c7852a3999674a0d276b4bf66eb5ac4b4fe4a",
+    "token": "359228d1831192e52511a600c60cb5bf1ff6be5687e3dde2004dce85c7808ae2",
     "created_at": "2026-05-09T09:51:06.036609"
-  },
-  {
-    "id": 11,
-    "name": "gow",
-    "email": "n@gmail.com",
-    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
-    "role": "admin",
-    "token": "e52adcd01fb9370a425785eb27f573e1bd633c6655918ac67d1378d91fb7c4a3",
-    "created_at": "2026-05-09T11:21:07.126959"
-  },
-  {
-    "id": 12,
-    "name": "gow",
-    "email": "g@gmail.com",
-    "hashed_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-    "role": "admin",
-    "token": "b918c9fb43208baec89f493f984fb1011de895e625ca8b21d8a41dc22584aec1",
-    "created_at": "2026-05-09T11:51:09.155818"
-  },
-  {
-    "id": 13,
-    "name": "VGA",
-    "email": "gowthamadithyavurukuti@gmail.com",
-    "hashed_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-    "role": "admin",
-    "token": "67c4be634c31d4efe9061b38ee3f8863a863019bb84666c3d9b1dedb1a70fe41",
-    "created_at": "2026-05-09T12:14:47.375956"
-  },
-  {
-    "id": 14,
-    "name": "gowtham",
-    "email": "g@gmail.com",
-    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
-    "role": "admin",
-    "token": "27aaac3c78be2362d1ec505c7e78705f6f3b3bacd9722c0294733f707b00305d",
-    "created_at": "2026-05-08T15:32:19.967212"
-  },
-  {
-    "id": 15,
-    "name": "nithu",
-    "email": "1@gmail.com",
-    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
-    "role": "admin",
-    "token": "666f47be2aab043b746fb46737c3abf0fe1ce72f66cac8b392ce8f165b4dc72d",
-    "created_at": "2026-05-09T15:37:40.601439"
   }
 ]

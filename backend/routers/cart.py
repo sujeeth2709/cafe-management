@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from typing import List
 
+
 router = APIRouter(prefix="/api/cart", tags=["Cart"])
+
 
 @router.post("/validate")
 def validate_cart(item_ids: List[int]):

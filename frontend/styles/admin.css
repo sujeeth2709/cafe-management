@@ -4,6 +4,7 @@
   min-height: calc(100vh - var(--nav-h));
   gap: 0;
 }
+
 .admin-sidebar {
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -13,6 +14,7 @@
   height: calc(100vh - var(--nav-h));
   overflow-y: auto;
 }
+
 .sidebar-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--text-dim); font-weight: 600; padding: 0 8px; margin-bottom: 6px; margin-top: 16px;

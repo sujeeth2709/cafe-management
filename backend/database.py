@@ -1,4 +1,4 @@
-# database.py — JSON-based fake database (no MySQL needed)
+
 import json
 import os
 from datetime import datetime
@@ -18,6 +18,7 @@ def _save_users(users: list):
         json.dump(users, f, indent=2, default=str)
 
 
+
 def get_all_users() -> list:
     return _load_users()
 
@@ -32,6 +33,8 @@ def get_user_by_id(user_id: int) -> dict | None:
     return next((u for u in users if u["id"] == user_id), None)
 
 
+
+
 def create_user(name: str, email: str, hashed_password: str, role: str = "customer") -> dict:
     users = _load_users()
     new_user = {
@@ -42,6 +45,7 @@ def create_user(name: str, email: str, hashed_password: str, role: str = "custom
         "role": role,
         "created_at": datetime.now().isoformat()
     }
+    
     users.append(new_user)
     _save_users(users)
     return new_user
