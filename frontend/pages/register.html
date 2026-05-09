@@ -53,8 +53,8 @@
       btn.disabled = true; btn.textContent = 'Creating…';
       try {
         await Auth.register(name, email, password);
-        showToast('Account created! Please sign in.', 'success');
-        setTimeout(() => window.location.href = 'login.html', 1000);
+        showToast('Account created! Redirecting...', 'success');
+        window.location.replace('login.html'); // Immediate redirect
       } catch (e) {
         showToast(e.message, 'error');
         btn.disabled = false; btn.textContent = 'Create Account';

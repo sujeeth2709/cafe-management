@@ -110,8 +110,7 @@
       const area = document.getElementById('nav-user-area');
       if (user) {
         area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
-          ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}
-          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+          ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-sm btn-secondary">Admin</a>' : ''}`;
       } else {
         area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
       }

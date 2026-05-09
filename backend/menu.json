@@ -19,7 +19,7 @@
   },
   {
     "id": 3,
-    "name": "Café Latte",
+    "name": "Caf\u00e9 Latte",
     "category": "Coffee",
     "price": 130,
     "description": "Smooth espresso with creamy steamed milk",
@@ -39,7 +39,7 @@
     "id": 5,
     "name": "Mocha",
     "category": "Coffee",
-    "price": 140,
+    "price": 150.0,
     "description": "Espresso blended with rich chocolate and milk",
     "image_url": null,
     "is_available": true

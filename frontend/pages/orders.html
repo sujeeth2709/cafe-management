@@ -81,8 +81,7 @@
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       const area = document.getElementById('nav-user-area');
       if (user) {
-        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>
-          <button class="btn btn-sm btn-secondary" onclick="logout()">Out</button>`;
+        area.innerHTML = `<div class="user-pill"><span>${user.name.split(' ')[0]}</span><span class="user-role">${user.role}</span></div>`;
       } else {
         area.innerHTML = `<a href="login.html" class="btn btn-sm btn-primary">Sign In</a>`;
       }

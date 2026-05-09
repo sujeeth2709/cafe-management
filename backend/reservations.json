@@ -28,5 +28,15 @@
     "guests": 12,
     "status": "pending",
     "created_at": "2026-05-06T18:51:50.219795"
+  },
+  {
+    "id": 4,
+    "user_id": 10,
+    "table_number": 11,
+    "date": "2026-05-12",
+    "time": "13:40",
+    "guests": 5,
+    "status": "confirmed",
+    "created_at": "2026-05-09T09:53:01.957588"
   }
 ]
