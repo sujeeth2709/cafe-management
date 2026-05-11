@@ -115,5 +115,14 @@
     "role": "admin",
     "token": "58eca73e42f14c5b3fa716022d4cda0fea03c0176f7c511ee851f357e5b24ef7",
     "created_at": "2026-05-09T18:07:43.972235"
+  },
+  {
+    "id": 14,
+    "name": "nithu",
+    "email": "mm@gmail.com",
+    "hashed_password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
+    "role": "admin",
+    "token": "cfc8a0ab6ec423b9c88480d6b69b286efc6482010507d19b13a1d69105256396",
+    "created_at": "2026-05-11T15:27:05.093580"
   }
 ]
