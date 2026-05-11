@@ -34,7 +34,7 @@
       <button class="filter-btn active" data-cat="all">All</button>
     </div>
 
-    <div id="menu-grid" class="grid-3">
+    <div id="menu-grid">
       <div class="spinner"></div>
     </div>
   </div>
@@ -60,7 +60,9 @@
       const cats = ['all', ...new Set(allItems.map(i => i.category))];
       const filtersEl = document.getElementById('filters');
       filtersEl.innerHTML = cats.map(c => `
-        <button class="filter-btn ${c === 'all' ? 'active' : ''}" data-cat="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</button>
+        <button class="filter-btn ${c === 'all' ? 'active' : ''}" data-cat="${c}">
+          ${c.charAt(0).toUpperCase() + c.slice(1)}
+        </button>
       `).join('');
       filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -80,21 +82,15 @@
       }
       grid.innerHTML = items.map(item => `
         <div class="menu-card">
-          <div class="menu-card-img">
-            ${item.image_url
-              ? `<img src="${item.image_url}" alt="${item.name}" loading="lazy" />`
-              : `<span class="no-img">🍽</span>`}
-          </div>
-          <div class="menu-card-body">
-            <div class="menu-card-category">${item.category}</div>
-            <div class="menu-card-name">${item.name}</div>
-            <div class="menu-card-desc">${item.description || 'A delightful choice.'}</div>
-            <div class="menu-card-footer">
-              <span class="menu-card-price">${formatCurrency(item.price)}</span>
-              ${item.is_available
-                ? `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">Add to Cart</button>`
-                : `<span class="unavailable-badge">Unavailable</span>`}
-            </div>
+          <div class="menu-card-category">${item.category}</div>
+          <div class="menu-card-name">${item.name}</div>
+          <div class="menu-card-desc">${item.description || 'A delightful choice.'}</div>
+          <hr class="menu-card-divider" />
+          <div class="menu-card-footer">
+            <span class="menu-card-price">${formatCurrency(item.price)}</span>
+            ${item.is_available
+              ? `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">+ Add</button>`
+              : `<span class="unavailable-badge">Unavailable</span>`}
           </div>
         </div>
       `).join('');
