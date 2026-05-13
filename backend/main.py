@@ -1,10 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, menu as menu_router, orders, reservations, admin, cart
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
-app = FastAPI(title="Cafe Management API", version="1.0.0")
+from routers import auth
+from routers import menu as menu_router
+from routers import orders
+from routers import reservations
+from routers import admin
+from routers import cart
 
-# CORS — allows frontend to talk to backend
+app = FastAPI(
+    title="Cafe Management API",
+    version="1.0.0"
+)
+
+# CORS - allows frontend to communicate with backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -12,11 +23,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-from fastapi.staticfiles import StaticFiles
 
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
+# Correct frontend path for Render deployment
+frontend_path = Path(__file__).resolve().parent.parent / "frontend"
 
-# Register routers
+# Register API routers
 app.include_router(auth.router)
 app.include_router(menu_router.router)
 app.include_router(orders.router)
@@ -24,8 +35,9 @@ app.include_router(reservations.router)
 app.include_router(admin.router)
 app.include_router(cart.router)
 
-
-
-@app.get("/")
-def root():
-    return {"message": "Cafe Management API is running ✅"}
+# Serve frontend files
+app.mount(
+    "/",
+    StaticFiles(directory=frontend_path, html=True),
+    name="static"
+)
