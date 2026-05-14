@@ -19,24 +19,24 @@ function isLoggedIn() {
 
 function requireAuth() {
   if (!isLoggedIn()) {
-    window.location.href = '/frontend/pages/login.html';
+    window.location.href = '/pages/login.html';
   }
 }
 
 function requireAdmin() {
   const user = getCurrentUser();
   if (!user || user.role !== 'admin') {
-    window.location.href = '/frontend/pages/login.html';
+    window.location.href = '/pages/login.html';
   }
 }
 
 function redirectIfLoggedIn() {
   if (isLoggedIn()) {
-    window.location.href = '/frontend/pages/admin/index.html'; // All users go to admin panel
+    window.location.href = '/pages/admin/index.html';
   }
 }
 
 function logout() {
   clearSession();
-  window.location.href = '/frontend/pages/login.html';
+  window.location.href = '/pages/login.html';
 }
