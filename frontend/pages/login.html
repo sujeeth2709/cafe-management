@@ -47,11 +47,10 @@
       btn.disabled = true; btn.textContent = 'Signing in…';
       try {
         const data = await Auth.login(email, password);
-        // Backend returns { token, user: { id, name, email, role } }
         saveSession(data.token, data.user);
         showToast(`Welcome back, ${data.user.name.split(' ')[0]}!`, 'success');
         setTimeout(() => {
-          window.location.href = 'admin/index.html'; // All users go to admin panel
+          window.location.href = '/pages/index.html';
         }, 800);
       } catch (e) {
         showToast(e.message, 'error');
