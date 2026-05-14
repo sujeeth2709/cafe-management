@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = ''; // Same domain — works both locally and on Render
 
 function getToken() {
   return localStorage.getItem('token');
@@ -42,7 +42,6 @@ const Cart = {
 
 // ── Orders ───────────────────────────────────────────
 const Orders = {
-  // items: array of {menu_item_id, name, quantity, price}, tableNumber: int
   create: (items, tableNumber) =>
     apiFetch('/api/orders/', { method: 'POST', body: JSON.stringify({ items, table_number: tableNumber }) }),
   myOrders: () => apiFetch('/api/orders/me'),
@@ -53,7 +52,6 @@ const Orders = {
 
 // ── Reservations ─────────────────────────────────────
 const Reservations = {
-  // tableNumber: int (1-20)
   create: (date, time, guests, tableNumber) =>
     apiFetch('/api/reservations/', { method: 'POST', body: JSON.stringify({ date, time, guests, table_number: tableNumber }) }),
   myReservations: () => apiFetch('/api/reservations/me'),
