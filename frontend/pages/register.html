@@ -23,7 +23,8 @@
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input id="email" type="email" class="form-input" placeholder="you@example.com" />
+        <input id="email" type="text" class="form-input" placeholder="you@example.com" />
+        <!-- type="text" intentionally — we validate manually for better error messages -->
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
@@ -43,21 +44,35 @@
   <script>
     redirectIfLoggedIn();
 
+    function isValidEmail(email) {
+      // Strict check: must have text @ text . text, no spaces
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    }
+
     async function doRegister() {
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
+      const name     = document.getElementById('name').value.trim();
+      const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const btn = document.getElementById('reg-btn');
-      if (!name || !email || !password) return showToast('Please fill in all fields', 'error');
+      const btn      = document.getElementById('reg-btn');
+
+      // ── Validation ──────────────────────────────────────
+      if (!name) return showToast('Please enter your full name', 'error');
+      if (!email) return showToast('Please enter your email', 'error');
+      if (!isValidEmail(email)) return showToast('Enter a valid email like you@example.com', 'error');
+      if (!password) return showToast('Please enter a password', 'error');
       if (password.length < 6) return showToast('Password must be at least 6 characters', 'error');
-      btn.disabled = true; btn.textContent = 'Creating…';
+
+      // ── Submit ───────────────────────────────────────────
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
       try {
         await Auth.register(name, email, password);
         showToast('Account created! Redirecting...', 'success');
-        window.location.replace('login.html'); // Immediate redirect
+        setTimeout(() => window.location.replace('login.html'), 1500);
       } catch (e) {
         showToast(e.message, 'error');
-        btn.disabled = false; btn.textContent = 'Create Account';
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
       }
     }
   </script>
