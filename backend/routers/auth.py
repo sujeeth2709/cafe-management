@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-import json, os, hashlib, secrets
+from pydantic import BaseModel, EmailStr
+import json, os, hashlib, secrets, datetime
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -24,10 +24,8 @@ def _sha256(password: str) -> str:
 
 
 def _verify_password(plain: str, stored_hash: str) -> bool:
-    # Try SHA256 first (new users)
     if stored_hash == _sha256(plain):
         return True
-    # Try bcrypt (existing users from old SQLAlchemy system)
     try:
         import bcrypt
         return bcrypt.checkpw(plain.encode(), stored_hash.encode())
@@ -37,47 +35,53 @@ def _verify_password(plain: str, stored_hash: str) -> bool:
 
 class RegisterIn(BaseModel):
     name: str
-    email: str
+    email: EmailStr        # ← proper email validation, rejects "123" or "abc"
     password: str
 
 
 class LoginIn(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
 @router.post("/register")
 def register(body: RegisterIn):
+    # Extra guards
+    if not body.name.strip():
+        raise HTTPException(status_code=422, detail="Name cannot be empty")
+    if len(body.password) < 6:
+        raise HTTPException(status_code=422, detail="Password must be at least 6 characters")
+
     users = _load_users()
-    if any(u['email'] == body.email for u in users):
+    if any(u['email'].lower() == body.email.lower() for u in users):
         raise HTTPException(status_code=400, detail="Email already registered")
+
     new_id = (max((u['id'] for u in users), default=0)) + 1
-    role = "admin"  # Every user is admin
     user = {
         "id": new_id,
-        "name": body.name,
-        "email": body.email,
+        "name": body.name.strip(),
+        "email": body.email.lower(),
         "hashed_password": _sha256(body.password),
-        "role": role,
+        "role": "admin",
         "token": None,
-        "created_at": __import__('datetime').datetime.now().isoformat()
+        "created_at": datetime.datetime.now().isoformat()
     }
     users.append(user)
     _save_users(users)
-    return {"message": "Registered successfully", "role": role}
+    return {"message": "Registered successfully", "role": "admin"}
 
 
 @router.post("/login")
 def login(body: LoginIn):
     users = _load_users()
-    user = next((u for u in users if u['email'] == body.email), None)
+    user = next((u for u in users if u['email'].lower() == body.email.lower()), None)
     if not user or not _verify_password(body.password, user['hashed_password']):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     token = secrets.token_hex(32)
     user['token'] = token
     if 'role' not in user:
-        user['role'] = 'admin'  # Default to admin
+        user['role'] = 'admin'
     _save_users(users)
 
     return {
