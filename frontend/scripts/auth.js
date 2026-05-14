@@ -32,7 +32,7 @@ function requireAdmin() {
 
 function redirectIfLoggedIn() {
   if (isLoggedIn()) {
-    window.location.href = '/pages/admin/index.html';
+    window.location.href = '/pages/index.html';
   }
 }
 
